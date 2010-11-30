@@ -190,15 +190,6 @@ done
 
 AC_SUBST(gold_baseargs)
 
-#
-# Check for Canadian cross, which is not supported.
-#
-AC_MSG_CHECKING([for Canadian cross])
-if test $build != $host ; then
-  AC_MSG_ERROR(Canadian cross build not supported.)
-fi
-AC_MSG_RESULT(no)
-
 # package to source path
 case $srcdir in
  /* | [A-Za-z]:*) package_to_srcdir=$srcdir ;;
@@ -385,5 +376,27 @@ AC_ARG_WITH([gdb-version],
 AC_MSG_RESULT($GDB_VERSION)
 AC_SUBST(GDB_VERSION)
 ANDROID_CHECK_PACKAGE(gdb-${GDB_VERSION})
+
+# Sysroot location
+AC_ARG_WITH([sysroot],
+  [  --with-sysroot=DIR
+                          use target sysroot in DIR],
+  [if test x"$withval" != x ; then
+     if test $build != $host ; then
+       case "$withval" in
+         "$prefix"|"${prefix%/}/"*)
+           ;;
+         *)
+           AC_MSG_ERROR('Target sysroot must be a subdirectory of <prefix> for canadian cross build $prefix ; $withval')
+           ;;
+       esac
+     fi
+
+     sysroot="$withval"
+   fi],
+[if test $build != $host ; then
+   AC_MSG_ERROR('Target sysroot is not set for canadian cross build')
+ fi])
+AC_SUBST(sysroot)
 
 AC_OUTPUT

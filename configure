@@ -271,7 +271,7 @@ PACKAGE_VERSION='2.0'
 PACKAGE_STRING='android-tools 2.0'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION GDB_VERSION LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION GDB_VERSION sysroot LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -810,6 +810,8 @@ Optional Packages:
                           use mpc-VERSION (default is 0.8.1)
   --with-gdb-version=VERSION
                           use gdb-VERSION (default is 6.6)
+  --with-sysroot=DIR
+                          use target sysroot in DIR
 
 _ACEOF
 fi
@@ -1555,19 +1557,6 @@ done
 
 
 
-#
-# Check for Canadian cross, which is not supported.
-#
-echo "$as_me:$LINENO: checking for Canadian cross" >&5
-echo $ECHO_N "checking for Canadian cross... $ECHO_C" >&6
-if test $build != $host ; then
-  { { echo "$as_me:$LINENO: error: Canadian cross build not supported." >&5
-echo "$as_me: error: Canadian cross build not supported." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-
 # package to source path
 case $srcdir in
  /* | A-Za-z:*) package_to_srcdir=$srcdir ;;
@@ -1955,6 +1944,35 @@ echo "$as_me: error: 'package gdb-${GDB_VERSION} does not exist.'" >&2;}
    { (exit 1); exit 1; }; }
   fi
 fi
+
+# Sysroot location
+
+# Check whether --with-sysroot or --without-sysroot was given.
+if test "${with_sysroot+set}" = set; then
+  withval="$with_sysroot"
+  if test x"$withval" != x ; then
+     if test $build != $host ; then
+       case "$withval" in
+         "$prefix"|"${prefix%/}/"*)
+           ;;
+         *)
+           { { echo "$as_me:$LINENO: error: 'Target sysroot must be a subdirectory of <prefix> for canadian cross build $prefix ; $withval'" >&5
+echo "$as_me: error: 'Target sysroot must be a subdirectory of <prefix> for canadian cross build $prefix ; $withval'" >&2;}
+   { (exit 1); exit 1; }; }
+           ;;
+       esac
+     fi
+
+     sysroot="$withval"
+   fi
+else
+  if test $build != $host ; then
+   { { echo "$as_me:$LINENO: error: 'Target sysroot is not set for canadian cross build'" >&5
+echo "$as_me: error: 'Target sysroot is not set for canadian cross build'" >&2;}
+   { (exit 1); exit 1; }; }
+ fi
+fi;
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -2618,6 +2636,7 @@ s,@GMP_VERSION@,$GMP_VERSION,;t t
 s,@MPFR_VERSION@,$MPFR_VERSION,;t t
 s,@MPC_VERSION@,$MPC_VERSION,;t t
 s,@GDB_VERSION@,$GDB_VERSION,;t t
+s,@sysroot@,$sysroot,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
