@@ -60,6 +60,7 @@ GDB_TARGET:=@GDB_TARGET@
 
 
 BINUTILS_VERSION=binutils-@BINUTILS_VERSION@
+GOLD_VERSION=binutils-@GOLD_VERSION@
 GCC_VERSION=gcc-@GCC_VERSION@
 NEWLIB_VERSION=newlib-@NEWLIB_VERSION@
 GMP_VERSION=gmp-@GMP_VERSION@
@@ -133,6 +134,11 @@ build: build-target-binutils build-target-gcc build-target-gdb
 
 install: install-target-binutils install-target-gcc install-target-gdb
 
+ifneq ($(BINUTILS_VERSION), $(GOLD_VERSION))
+build: build-target-gold
+install: install-target-gold
+endif
+
 # target binutils rules
 .PHONY: config-target-binutils build-target-binutils install-target-binutils
 config-target-binutils: stmp-config-target-binutils
@@ -152,6 +158,38 @@ stmp-build-target-binutils: stmp-config-target-binutils
 	$(MAKE) -C ${BINUTILS_VERSION} && $(STAMP) $@
 install-target-binutils: stmp-build-target-binutils
 	$(MAKE) -C ${BINUTILS_VERSION} install
+
+# target gold rules.  We need these only if BINUTILS_VERSION != GOLD_VERSION
+ifneq ($(BINUTILS_VERSION), $(GOLD_VERSION))
+.PHONY: config-target-gold build-target-gold install-target-gold
+config-target-gold: stmp-config-target-gold
+# We do not want to enable shared libraries in gold
+GOLD_CONFIG_ARGS=--prefix=$(prefix) \
+	--target=${target_alias} --host=${host} --build=${build} \
+	$(baseargs) --disable-shared
+stmp-config-target-gold: config.status
+	([ -d ${GOLD_VERSION} ] || \
+	  mkdir ${GOLD_VERSION}) && \
+	(cd ${GOLD_VERSION} ; \
+	 $(call find-package-srcdir, ${GOLD_VERSION})/configure \
+	  $(GOLD_CONFIG_ARGS)) && \
+	$(STAMP) $@
+build-target-gold: stmp-build-target-gold
+stmp-build-target-gold: stmp-config-target-gold
+	$(MAKE) -C ${GOLD_VERSION} && $(STAMP) $@
+
+# If we use a different binutils version of gold, we build gold twice.  We
+# first build everything, including gold with the main binutils version and
+# then install it.  Then we build the gold-only binutils version and install
+# just gold.  We don't bother to skip building the first gold to simplify
+# handling of all combinations of --enable-gold[=*]
+
+install-target-gold: stmp-build-target-gold install-target-binutils
+	make -C $(GOLD_VERSION)/gold install
+
+endif
+
+# target gcc rules
 
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc

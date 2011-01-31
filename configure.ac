@@ -1,4 +1,4 @@
-#   Copyright (C) 2008 Google Inc.
+#   Copyright (C) 2008, 2010 Google Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -48,6 +48,8 @@ AC_ARG_PROGRAM
 # Export original configure arguments for use by sub-configures.
 # Quote arguments with shell meta charatcers.
 TOPLEVEL_CONFIGURE_ARGUMENTS=
+TOPLEVEL_NO_GOLD_CONFIGURE_ARGUMENTS=
+
 set -- "$progname" "$@"
 for ac_arg
 do
@@ -171,6 +173,23 @@ fi
 
 AC_SUBST(baseargs)
 
+# Strip --{enable|disable}-{gold|ld}* from baseargs.  These are used for the
+# gold binutils.  Note that baseargs are quoted.
+gold_baseargs=
+for ac_arg in $baseargs
+do
+  case $ac_arg in
+  \'--enable-gold\' | \'--enable-gold=*\' | \'--disable-gold\' | \
+   \'--enable-ld\' | \'--enable-ld=*\' | \'--disable-ld\' )
+    ;;
+  *)
+    gold_baseargs="$gold_baseargs $ac_arg"
+    ;;
+  esac
+done
+
+AC_SUBST(gold_baseargs)
+
 #
 # Check for Canadian cross, which is not supported.
 #
@@ -198,7 +217,7 @@ AC_SUBST(package_to_srcdir)
 # 4. tool/x.tar.bz2
 m4_pattern_allow([^AC_MSG_ERROR$])
 AC_DEFUN([ANDROID_CHECK_PACKAGE],
-[x=$1; tool=${x%-*}; \
+[x=$1; tool=$(echo "$x" | sed -e 's/-.*//'); \
 if test ! -d $srcdir/../$tool/$1 ; then
   if test -f $srcdir/../$tool/$1.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/$1.tar
@@ -233,6 +252,24 @@ AC_ARG_WITH([binutils-version],
 AC_MSG_RESULT($BINUTILS_VERSION)
 AC_SUBST(BINUTILS_VERSION)
 ANDROID_CHECK_PACKAGE(binutils-${BINUTILS_VERSION})
+
+# gold binutils version (default is the same version as the main
+# binutils package).
+GOLD_VERSION="$BINUTILS_VERSION"
+AC_MSG_CHECKING([target gold binutils version to build])
+AC_ARG_WITH([gold-version],
+  [  --with-gold-version=VERSION
+                          use binutils-VERSION for gold (default is the main binutils version)],
+  [if test x"$withval" != x ; then
+     GOLD_VERSION="$withval"
+   fi])
+AC_MSG_RESULT($GOLD_VERSION)
+AC_SUBST(GOLD_VERSION)
+
+# Skip check if we are using the main binutils for gold.
+if test x"$GOLD_VERSION" != x"$BINUTILS_VERSION" ; then
+  ANDROID_CHECK_PACKAGE(binutils-${GOLD_VERSION})
+fi
 
 # gcc version (default is 4.2.1)
 AC_MSG_CHECKING([target gcc version to build])
