@@ -168,9 +168,11 @@ endif
 all: build
 
 # top level
-build: build-target-binutils build-target-gcc build-target-gdb
+build: build-target-binutils build-host-libbfd build-target-gcc \
+	build-target-gdb
 
-install: install-target-binutils install-target-gcc install-target-gdb
+install: install-target-binutils install-host-libbfd install-target-gcc \
+	install-target-gdb
 
 # To support canadian cross build we need to build build->target toolchain
 # as well as final host->target toolchain.
@@ -233,7 +235,7 @@ config-target-binutils: stmp-config-target-binutils
 # We do not want to enable shared libraries in binutils
 BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
-	$(baseargs) --disable-shared --enable-install-libbfd
+	$(baseargs) --disable-shared
 stmp-config-target-binutils: config.status $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
@@ -282,7 +284,25 @@ install-target-gold: stmp-build-target-gold install-target-binutils
 
 endif
 
-# target gcc rules
+# build libbfd for host.  We configure with all targets, so this is built
+# separately from the same source.
+.PHONY: config-host-libbfd build-host-libbfd install-host-libbfd
+config-host-libbfd: stmp-config-host-libbfd
+LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
+	--enable-targets=all --host=${host} --build=${build} \
+	$(baseargs) --disable-shared --enable-install-libbfd
+stmp-config-host-libbfd: config.status
+	([ -d libbfd-${BINUTILS_VERSION} ] || \
+	  mkdir libbfd-${BINUTILS_VERSION}) && \
+	(cd libbfd-${BINUTILS_VERSION} ; \
+	 $(call find-package-srcdir, ${BINUTILS_VERSION})/configure \
+	  $(LIBBFD_CONFIG_ARGS)) && \
+	$(STAMP) $@
+build-host-libbfd: stmp-build-host-libbfd
+stmp-build-host-libbfd: stmp-config-host-libbfd
+	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd && $(STAMP) $@
+install-host-libbfd: stmp-build-host-libbfd install-target-binutils
+	$(MAKE) -C libbfd-${BINUTILS_VERSION} install-bfd
 
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
