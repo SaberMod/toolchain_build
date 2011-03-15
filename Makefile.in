@@ -68,11 +68,26 @@ GMP_VERSION=gmp-@GMP_VERSION@
 MPFR_VERSION=mpfr-@MPFR_VERSION@
 MPC_VERSION=mpc-@MPC_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
+HAVE_MPC=@have_mpc@
+HAVE_MPFR=@have_mpfr@
+HAVE_GMP=@have_gmp@
 STAMP=touch
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
 TARGET_GCC_BUILDDIR=$(abs_builddir)/$(GCC_VERSION)
 TEMP_INSTALLDIR=$(abs_builddir)/temp-install
+
+ifeq ($(HAVE_MPC),no)
+  MPC_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_MPFR),no)
+  MPFR_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_GMP),no)
+  GMP_DIR=$(TEMP_INSTALLDIR)
+endif
 
 # Figure out where to find the ld binary.
 FIND_TARGET_LD=\
@@ -317,13 +332,13 @@ GCC_CONFIG_ARGS=--prefix=$(prefix) \
 # Also build libgcc is a seperate sub-target in 4.3.0+.
 ifeq ($(GCC_MIN_VERSION_4_3_0),yes)
 stmp-config-target-gcc: stmp-install-host-gmp stmp-install-host-mpfr
-GCC_CONFIG_ARGS += --with-gmp=$(TEMP_INSTALLDIR) --with-mpfr=$(TEMP_INSTALLDIR)
+GCC_CONFIG_ARGS += --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
 endif
 
 # For gcc versions 4.5.0 and higher, mpc is required.
 ifeq ($(GCC_MIN_VERSION_4_5_0),yes)
 stmp-config-target-gcc: stmp-install-host-mpc
-GCC_CONFIG_ARGS += --with-mpc=$(TEMP_INSTALLDIR)
+GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
 endif
 
 # Add Android specific gcc options.
@@ -441,10 +456,11 @@ stmp-build-host-gmp: stmp-config-host-gmp
 	 $(MAKE) -C ${GMP_VERSION}) && $(STAMP) $@
 build-host-gmp: stmp-build-host-gmp
 # Need -j1 to avoid a race condition in building on OS X.
+ifeq ($(HAVE_GMP),no)
 stmp-install-host-gmp: stmp-build-host-gmp
-	($(canadian_env) \
-	 $(MAKE) -C ${GMP_VERSION} install -j1) && \
-	$(STAMP) $@
+else
+stmp-install-host-gmp:
+endif
 install-host-gmp: stmp-install-host-gmp
 
 # host mpfr rules
@@ -452,7 +468,7 @@ install-host-gmp: stmp-install-host-gmp
 config-host-mpfr: stmp-config-host-mpfr
 MPFR_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --host=${cur_host} --build=${cur_build} \
-	  --with-gmp=$(TEMP_INSTALLDIR)
+	  --with-gmp=$(GMP_DIR)
 stmp-config-host-mpfr: config.status stmp-install-host-gmp
 	([ -d ${MPFR_VERSION} ] || \
 	  mkdir ${MPFR_VERSION}) && \
@@ -465,10 +481,11 @@ stmp-build-host-mpfr: stmp-config-host-mpfr
 	($(canadian_env) \
 	 $(MAKE) -C ${MPFR_VERSION}) && $(STAMP) $@
 build-host-mpfr: stmp-build-host-mpfr
+ifeq ($(HAVE_MPFR),no)
 stmp-install-host-mpfr: stmp-build-host-mpfr
-	($(canadian_env) \
-	 $(MAKE) -C ${MPFR_VERSION} install) && \
-	$(STAMP) $@
+else
+stmp-install-host-mpfr:
+endif
 install-host-mpfr: stmp-install-host-mpfr
 
 # host mpc rules
@@ -476,7 +493,7 @@ install-host-mpfr: stmp-install-host-mpfr
 config-host-mpc: stmp-config-host-mpc
 MPC_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	 --host=${cur_host} --build=${cur_build} \
-	 --with-gmp=$(TEMP_INSTALLDIR) --with-mpfr=$(TEMP_INSTALLDIR)
+	 --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
 stmp-config-host-mpc: config.status stmp-install-host-gmp stmp-install-host-mpfr
 	([ -d ${MPC_VERSION} ] || \
 	  mkdir ${MPC_VERSION}) && \
@@ -489,10 +506,11 @@ stmp-build-host-mpc: stmp-config-host-mpc
 	($(canadian_env) \
 	 $(MAKE) -C ${MPC_VERSION}) && $(STAMP) $@
 build-host-mpc: stmp-build-host-mpc
+ifeq ($(HAVE_MPC),no)
 stmp-install-host-mpc: stmp-build-host-mpc
-	($(canadian_env) \
-	 $(MAKE) -C ${MPC_VERSION} install) && \
-	$(STAMP) $@
+else
+stmp-install-host-mpc:
+endif
 install-host-mpc: stmp-install-host-mpc
 
 # target gdb rules

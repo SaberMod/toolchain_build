@@ -271,7 +271,7 @@ PACKAGE_VERSION='2.0'
 PACKAGE_STRING='android-tools 2.0'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION GDB_VERSION sysroot LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION GDB_VERSION sysroot have_mpc have_mpfr have_gmp LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -812,6 +812,12 @@ Optional Packages:
                           use gdb-VERSION (default is 6.6)
   --with-sysroot=DIR
                           use target sysroot in DIR
+  --with-mpc=PATH
+                          specify prefix directory for installed MPC package.
+  --with-mpfr=PATH
+                          specify prefix directory for installed MPFR package.
+  --with-gmp=PATH
+                          specify prefix directory for the installed GMP package.
 
 _ACEOF
 fi
@@ -1974,6 +1980,66 @@ echo "$as_me: error: 'Target sysroot is not set for canadian cross build'" >&2;}
 fi;
 
 
+# Specify a location for mpc
+
+# Check whether --with-mpc or --without-mpc was given.
+if test "${with_mpc+set}" = set; then
+  withval="$with_mpc"
+  if test -d "$withval" ; then
+     have_mpc="$withval"
+     have_mpfr="$withval"
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     { { echo "$as_me:$LINENO: error: invalid value for --with-mpc" >&5
+echo "$as_me: error: invalid value for --with-mpc" >&2;}
+   { (exit 1); exit 1; }; }
+   else
+     have_mpc=no
+   fi
+else
+  have_mpc=no
+fi;
+
+
+# Specify a location for mpfr
+
+# Check whether --with-mpfr or --without-mpfr was given.
+if test "${with_mpfr+set}" = set; then
+  withval="$with_mpfr"
+  if test -d "$withval" ; then
+     have_mpfr="$withval"
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     { { echo "$as_me:$LINENO: error: invalid value for --with-mpfr" >&5
+echo "$as_me: error: invalid value for --with-mpfr" >&2;}
+   { (exit 1); exit 1; }; }
+   else
+     have_mpfr=no
+   fi
+else
+  have_mpfr=no
+fi;
+
+
+# Specify a location for gmp
+
+# Check whether --with-gmp or --without-gmp was given.
+if test "${with_gmp+set}" = set; then
+  withval="$with_gmp"
+  if test -d "$withval" ; then
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     { { echo "$as_me:$LINENO: error: invalid value for --with-gmp" >&5
+echo "$as_me: error: invalid value for --with-gmp" >&2;}
+   { (exit 1); exit 1; }; }
+   else
+     have_gmp=no
+   fi
+else
+  have_gmp=no
+fi;
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -2637,6 +2703,9 @@ s,@MPFR_VERSION@,$MPFR_VERSION,;t t
 s,@MPC_VERSION@,$MPC_VERSION,;t t
 s,@GDB_VERSION@,$GDB_VERSION,;t t
 s,@sysroot@,$sysroot,;t t
+s,@have_mpc@,$have_mpc,;t t
+s,@have_mpfr@,$have_mpfr,;t t
+s,@have_gmp@,$have_gmp,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

@@ -399,4 +399,46 @@ AC_ARG_WITH([sysroot],
  fi])
 AC_SUBST(sysroot)
 
+# Specify a location for mpc
+AC_ARG_WITH(mpc, [  --with-mpc=PATH
+                          specify prefix directory for installed MPC package.],
+  [if test -d "$withval" ; then
+     have_mpc="$withval"
+     have_mpfr="$withval"
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-mpc)
+   else
+     have_mpc=no
+   fi],
+  [have_mpc=no])
+AC_SUBST(have_mpc)
+
+# Specify a location for mpfr
+AC_ARG_WITH(mpfr, [  --with-mpfr=PATH
+                          specify prefix directory for installed MPFR package.],
+  [if test -d "$withval" ; then
+     have_mpfr="$withval"
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-mpfr)
+   else
+     have_mpfr=no
+   fi],
+  [have_mpfr=no])
+AC_SUBST(have_mpfr)
+
+# Specify a location for gmp
+AC_ARG_WITH(gmp, [  --with-gmp=PATH
+                          specify prefix directory for the installed GMP package.],
+  [if test -d "$withval" ; then
+     have_gmp="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-gmp)
+   else
+     have_gmp=no
+   fi],
+  [have_gmp=no])
+AC_SUBST(have_gmp)
+
 AC_OUTPUT
