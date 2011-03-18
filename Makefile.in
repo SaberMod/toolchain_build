@@ -458,6 +458,7 @@ build-host-gmp: stmp-build-host-gmp
 # Need -j1 to avoid a race condition in building on OS X.
 ifeq ($(HAVE_GMP),no)
 stmp-install-host-gmp: stmp-build-host-gmp
+	$(MAKE) -C ${GMP_VERSION} install -j1 && $(STAMP) $@
 else
 stmp-install-host-gmp:
 endif
@@ -483,6 +484,7 @@ stmp-build-host-mpfr: stmp-config-host-mpfr
 build-host-mpfr: stmp-build-host-mpfr
 ifeq ($(HAVE_MPFR),no)
 stmp-install-host-mpfr: stmp-build-host-mpfr
+	$(MAKE) -C ${MPFR_VERSION} install && $(STAMP) $@
 else
 stmp-install-host-mpfr:
 endif
@@ -508,6 +510,7 @@ stmp-build-host-mpc: stmp-config-host-mpc
 build-host-mpc: stmp-build-host-mpc
 ifeq ($(HAVE_MPC),no)
 stmp-install-host-mpc: stmp-build-host-mpc
+	$(MAKE) -C ${MPC_VERSION} install && $(STAMP) $@
 else
 stmp-install-host-mpc:
 endif
