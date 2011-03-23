@@ -518,6 +518,11 @@ install-host-mpc: stmp-install-host-mpc
 
 # target gdb rules
 .PHONY: config-target-gdb build-target-gdb install-target-gdb
+ifeq ($(GDB_VERSION),gdb-none)
+config-target-gdb:
+build-target-gdb:
+install-target-gdb:
+else
 config-target-gdb: stmp-config-target-gdb
 
 GDB_CONFIG_ARGS=$(baseargs) --prefix=$(prefix) \
@@ -539,6 +544,7 @@ stmp-build-target-gdb: stmp-config-target-gdb
 install-target-gdb: stmp-build-target-gdb
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION} install)
+endif
 
 # clean rules
 .PHONY: clean

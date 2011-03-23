@@ -1598,8 +1598,8 @@ fi;
 echo "$as_me:$LINENO: result: $BINUTILS_VERSION" >&5
 echo "${ECHO_T}$BINUTILS_VERSION" >&6
 
-x=binutils-${BINUTILS_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/binutils-${BINUTILS_VERSION} ; then
+x=binutils-${BINUTILS_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/binutils-${BINUTILS_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/binutils-${BINUTILS_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/binutils-${BINUTILS_VERSION}.tar
   elif test -f $srcdir/../$tool/binutils-${BINUTILS_VERSION}.tar.gz ; then
@@ -1642,8 +1642,8 @@ echo "${ECHO_T}$GOLD_VERSION" >&6
 
 # Skip check if we are using the main binutils for gold.
 if test x"$GOLD_VERSION" != x"$BINUTILS_VERSION" ; then
-  x=binutils-${GOLD_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/binutils-${GOLD_VERSION} ; then
+  x=binutils-${GOLD_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/binutils-${GOLD_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/binutils-${GOLD_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/binutils-${GOLD_VERSION}.tar
   elif test -f $srcdir/../$tool/binutils-${GOLD_VERSION}.tar.gz ; then
@@ -1684,8 +1684,8 @@ fi;
 echo "$as_me:$LINENO: result: $GCC_VERSION" >&5
 echo "${ECHO_T}$GCC_VERSION" >&6
 
-x=gcc-${GCC_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/gcc-${GCC_VERSION} ; then
+x=gcc-${GCC_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/gcc-${GCC_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/gcc-${GCC_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/gcc-${GCC_VERSION}.tar
   elif test -f $srcdir/../$tool/gcc-${GCC_VERSION}.tar.gz ; then
@@ -1753,8 +1753,8 @@ fi;
 echo "$as_me:$LINENO: result: $NEWLIB_VERSION" >&5
 echo "${ECHO_T}$NEWLIB_VERSION" >&6
 
-x=newlib-${NEWLIB_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/newlib-${NEWLIB_VERSION} ; then
+x=newlib-${NEWLIB_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/newlib-${NEWLIB_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/newlib-${NEWLIB_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/newlib-${NEWLIB_VERSION}.tar
   elif test -f $srcdir/../$tool/newlib-${NEWLIB_VERSION}.tar.gz ; then
@@ -1796,8 +1796,8 @@ else
 fi;
 echo "$as_me:$LINENO: result: $GMP_VERSION" >&5
 echo "${ECHO_T}$GMP_VERSION" >&6
-x=gmp-${GMP_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/gmp-${GMP_VERSION} ; then
+x=gmp-${GMP_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/gmp-${GMP_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/gmp-${GMP_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/gmp-${GMP_VERSION}.tar
   elif test -f $srcdir/../$tool/gmp-${GMP_VERSION}.tar.gz ; then
@@ -1837,8 +1837,8 @@ else
 fi;
 echo "$as_me:$LINENO: result: $MPFR_VERSION" >&5
 echo "${ECHO_T}$MPFR_VERSION" >&6
-x=mpfr-${MPFR_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/mpfr-${MPFR_VERSION} ; then
+x=mpfr-${MPFR_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/mpfr-${MPFR_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/mpfr-${MPFR_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/mpfr-${MPFR_VERSION}.tar
   elif test -f $srcdir/../$tool/mpfr-${MPFR_VERSION}.tar.gz ; then
@@ -1883,8 +1883,8 @@ else
 fi;
 echo "$as_me:$LINENO: result: $MPC_VERSION" >&5
 echo "${ECHO_T}$MPC_VERSION" >&6
-x=mpc-${MPC_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/mpc-${MPC_VERSION} ; then
+x=mpc-${MPC_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/mpc-${MPC_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/mpc-${MPC_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/mpc-${MPC_VERSION}.tar
   elif test -f $srcdir/../$tool/mpc-${MPC_VERSION}.tar.gz ; then
@@ -1926,8 +1926,8 @@ fi;
 echo "$as_me:$LINENO: result: $GDB_VERSION" >&5
 echo "${ECHO_T}$GDB_VERSION" >&6
 
-x=gdb-${GDB_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/gdb-${GDB_VERSION} ; then
+x=gdb-${GDB_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/gdb-${GDB_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/gdb-${GDB_VERSION}.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/gdb-${GDB_VERSION}.tar
   elif test -f $srcdir/../$tool/gdb-${GDB_VERSION}.tar.gz ; then

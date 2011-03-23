@@ -208,8 +208,8 @@ AC_SUBST(package_to_srcdir)
 # 4. tool/x.tar.bz2
 m4_pattern_allow([^AC_MSG_ERROR$])
 AC_DEFUN([ANDROID_CHECK_PACKAGE],
-[x=$1; tool=$(echo "$x" | sed -e 's/-.*//'); \
-if test ! -d $srcdir/../$tool/$1 ; then
+[x=$1; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[[^-]]*-//'); \
+if test \( ! -d $srcdir/../$tool/$1 \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/$1.tar ; then
     mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/$1.tar
   elif test -f $srcdir/../$tool/$1.tar.gz ; then
