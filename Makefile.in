@@ -44,6 +44,9 @@ mandir = @mandir@
 
 builddir = @builddir@
 abs_builddir = @abs_builddir@
+
+INSTALL=@INSTALL@
+
 #
 # miscellaneous variables
 #
@@ -305,7 +308,8 @@ endif
 config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--enable-targets=all --host=${host} --build=${build} \
-	$(baseargs) --disable-shared --enable-install-libbfd
+	$(baseargs) --disable-shared \
+	--enable-install-libbfd --with-included-gettext
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
 	  mkdir libbfd-${BINUTILS_VERSION}) && \
@@ -315,9 +319,18 @@ stmp-config-host-libbfd: config.status
 	$(STAMP) $@
 build-host-libbfd: stmp-build-host-libbfd
 stmp-build-host-libbfd: stmp-config-host-libbfd
-	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd && $(STAMP) $@
+	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd all-libiberty && \
+	$(STAMP) $@
+# Also include libintl.a.  We have to do this manully since the
+# source of libintl in binutils is modified to not install the library.
+# We build with -m32 always.  To avoid installing libiberty.a into /lib32,
+# we need to manually install the archive.  This will need to be cleaned up.
 install-host-libbfd: stmp-build-host-libbfd install-target-binutils
-	$(MAKE) -C libbfd-${BINUTILS_VERSION} install-bfd
+	$(MAKE) -C libbfd-${BINUTILS_VERSION} install-bfd install-libiberty && \
+	$(INSTALL) -m 644 libbfd-${BINUTILS_VERSION}/intl/libintl.a \
+		$(libdir) && \
+	$(INSTALL) -m 644 libbfd-${BINUTILS_VERSION}/libiberty/libiberty.a \
+		$(libdir)
 
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
@@ -346,19 +359,29 @@ endif
 
 
 # Target indenpendent Android gcc options.
+# For now we build a static version of libsupc++.
 ifeq ($(BUILD_ANDROID_GCC),yes)
 GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
 	--enable-threads --disable-nls --disable-libmudflap --disable-libgomp \
-	--disable-libstdc__-v3 --disable-sjlj-exceptions --disable-shared \
+	--disable-sjlj-exceptions --disable-shared \
 	--disable-tls
+
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
 # ARM specific options.
 ifeq ($(target_cpu),arm)
 GCC_CONFIG_ARGS += --with-float=soft --with-fpu=vfp --with-arch=armv5te \
 	--enable-target-optspace
+
+# Experimental: build libsupc++.a for ARM.
+GCC_CONFIG_ARGS += --disable-hosted-libstdcxx \
+	--enable-cxx-flags="-fexceptions -frtti"
+
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
+
+else
+GCC_CONFIG_ARGS += --disable-libstdc__-v3
 endif
 
 endif

@@ -1,4 +1,4 @@
-#   Copyright (C) 2008, 2010 Google Inc.
+#   Copyright (C) 2008, 2010, 2011 Google Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@ AC_PREREQ(2.59)
 AC_CONFIG_FILES([Makefile])
 
 AC_CANONICAL_SYSTEM
+
+# Get 'install' or 'install-sh' and its variants.
+AC_PROG_INSTALL
 
 # We only allow the following 3 targets:
 # 1. arm-linux-androideabi (primary target)
