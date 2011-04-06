@@ -54,6 +54,7 @@ TOPLEVEL_CONFIGURE_ARGUMENTS:=@TOPLEVEL_CONFIGURE_ARGUMENTS@
 baseargs = @baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
+ENABLE_GRAPHITE:=@ENABLE_GRAPHITE@
 PACKAGE_TO_SRCDIR:=@package_to_srcdir@
 BUILD_ANDROID_GCC:=@BUILD_ANDROID_GCC@
 GDB_TARGET:=@GDB_TARGET@
@@ -70,10 +71,14 @@ NEWLIB_VERSION=newlib-@NEWLIB_VERSION@
 GMP_VERSION=gmp-@GMP_VERSION@
 MPFR_VERSION=mpfr-@MPFR_VERSION@
 MPC_VERSION=mpc-@MPC_VERSION@
+PPL_VERSION=ppl-@PPL_VERSION@
+CLOOG_VERSION=cloog-@CLOOG_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
 HAVE_MPC=@have_mpc@
 HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
+HAVE_PPL=@have_ppl@
+HAVE_CLOOG=@have_cloog@
 STAMP=touch
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
@@ -90,6 +95,14 @@ endif
 
 ifeq ($(HAVE_GMP),no)
   GMP_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_PPL), no)
+  PPL_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_CLOOG), no)
+  CLOOG_DIR=$(TEMP_INSTALLDIR)
 endif
 
 # Figure out where to find the ld binary.
@@ -186,6 +199,9 @@ endif
 all: build
 
 # top level
+ifeq ($(ENABLE_GRAPHITE),yes)
+build: install-host-cloog
+endif
 build: build-target-binutils build-host-libbfd build-target-gcc \
 	build-target-gdb
 
@@ -254,6 +270,14 @@ config-target-binutils: stmp-config-target-binutils
 BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
 	$(baseargs) --disable-shared
+ifeq ($(ENABLE_GRAPHITE),yes)
+BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-gmp=${GMP_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check
+# links to the static C++ runtime to avoid depending on the host version
+BINUTILS_CONFIG_ARGS+= \
+	'--with-host-libstdcxx=-static-libgcc \
+	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
+endif
 stmp-config-target-binutils: config.status $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
@@ -352,6 +376,16 @@ endif
 ifeq ($(GCC_MIN_VERSION_4_5_0),yes)
 stmp-config-target-gcc: stmp-install-host-mpc
 GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
+endif
+
+# For gcc 4.5+ with graphite optimization, cloog and ppl are required.
+ifeq ($(ENABLE_GRAPHITE),yes)
+GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-ppl=${PPL_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check
+# links to the static C++ runtime to avoid depending on the host version
+GCC_CONFIG_ARGS += \
+	'--with-host-libstdcxx=-static-libgcc \
+	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
 endif
 
 # Add Android specific gcc options.
@@ -466,6 +500,11 @@ install-target-newlib: stmp-build-target-newlib
 config-host-gmp: stmp-config-host-gmp
 GMP_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --host=${cur_host} --build=${cur_build}
+
+ifeq ($(ENABLE_GRAPHITE),yes)
+GMP_CONFIG_ARGS+= --enable-cxx
+endif
+
 stmp-config-host-gmp: config.status $(canadian_stmp)
 	([ -d ${GMP_VERSION} ] || \
 	  mkdir ${GMP_VERSION}) && \
@@ -538,6 +577,70 @@ else
 stmp-install-host-mpc:
 endif
 install-host-mpc: stmp-install-host-mpc
+
+# host ppl rules
+.PHONY: config-host-ppl build-host-ppl install-host-ppl
+config-host-ppl: stmp-config-host-ppl
+PPL_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+		--target=${target_alias} \
+		--host=${host} --build=${build} \
+		--disable-nls --with-gmp-prefix=$(GMP_DIR) \
+		--disable-watchdog \
+		--disable-ppl_lcdd --disable-ppl_lpsol --disable-ppl_pips
+stmp-config-host-ppl: config.status stmp-install-host-gmp
+	([ -d ${PPL_VERSION} ] || \
+	 mkdir ${PPL_VERSION}) && \
+	($(canadian_env) \
+	 cd ${PPL_VERSION} ; \
+	$(call find-package-srcdir, ${PPL_VERSION})/configure \
+	 $(PPL_CONFIG_ARGS)) && \
+	$(STAMP) $@
+stmp-build-host-ppl: stmp-config-host-ppl
+	$(MAKE) -C ${PPL_VERSION} && $(STAMP) $@
+build-host-ppl: stmp-build-host-ppl
+stmp-install-host-ppl: stmp-build-host-ppl
+	$(MAKE) -C ${PPL_VERSION} install && \
+	$(STAMP) $@
+install-host-ppl: stmp-install-host-ppl
+
+# host cloog rules
+.PHONY: config-host-cloog build-host-cloog install-host-cloog
+config-host-cloog: stmp-config-host-cloog
+CLOOG_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+       --target=${target_alias} \
+       --host=${host} --build=${build} \
+       --disable-nls \
+       --with-gmp=$(GMP_DIR)
+# for cloog-ppl version 0.15.x, ppl is required.
+ifneq ($(findstring ppl-,$(CLOOG_VERSION)),)
+stmp-config-host-cloog: config.status stmp-install-host-ppl \
+			stmp-install-host-ppl-workaround
+stmp-install-host-ppl-workaround:
+	# cloog 0.15.9 is unable to detect newer versions of ppl.
+	# Thus we modify the version definition in header file to satisfy.
+	sed -i -e 's/PPL_VERSION_MINOR 11/PPL_VERSION_MINOR 10/' \
+	 $(PPL_DIR)/include/ppl_c.h
+	$(STAMP) $@
+CLOOG_CONFIG_ARGS+= --with-ppl=$(PPL_DIR)
+endif
+stmp-config-host-cloog: config.status stmp-install-host-gmp
+	([ -d ${CLOOG_VERSION} ] || \
+	 mkdir ${CLOOG_VERSION}) && \
+	($(canadian_env) \
+	 cd ${CLOOG_VERSION} ; \
+	$(call find-package-srcdir, ${CLOOG_VERSION})/configure \
+	 $(CLOOG_CONFIG_ARGS)) && \
+	$(STAMP) $@
+stmp-build-host-cloog: stmp-config-host-cloog
+	# Ignore the generation of cloog utilities
+	$(MAKE) -C ${CLOOG_VERSION} libcloog.la && \
+	$(STAMP) $@
+build-host-cloog: stmp-build-host-cloog
+stmp-install-host-cloog: stmp-build-host-cloog
+	$(MAKE) -C ${CLOOG_VERSION} install-libLTLIBRARIES \
+		install-pkgincludeHEADERS && \
+	$(STAMP) $@
+install-host-cloog: stmp-install-host-cloog
 
 # target gdb rules
 .PHONY: config-target-gdb build-target-gdb install-target-gdb

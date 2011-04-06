@@ -193,6 +193,19 @@ done
 
 AC_SUBST(gold_baseargs)
 
+ENABLE_GRAPHITE=no
+AC_ARG_ENABLE([graphite],
+              AC_HELP_STRING([--enable-graphite],
+                             [Enable Graphite optimization @<:@default=no@:>@]))
+if test x${enableval} != xyes; then
+  graphite=no
+fi
+if test "$GCC_MIN_VERSION_4_5_0" == "no"; then
+  graphite=no
+fi
+ENABLE_GRAPHITE=$graphite
+AC_SUBST(ENABLE_GRAPHITE)
+
 # package to source path
 case $srcdir in
  /* | [A-Za-z]:*) package_to_srcdir=$srcdir ;;
@@ -367,6 +380,49 @@ ANDROID_CHECK_PACKAGE(mpc-${MPC_VERSION})
 fi
 AC_SUBST(MPC_VERSION)
 
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# ppl version (default is 0.11.2)
+# ppl is only used for gcc 4.5+ with graphite optimization.
+AC_MSG_CHECKING([ppl version])
+AC_ARG_WITH([ppl-version],
+  [  --with-ppl-version=VERSION
+                          use ppl-VERSION (default is 0.11.2)],
+  [if test x"$withval" != x ; then
+     PPL_VERSION="$withval"
+   fi],
+[PPL_VERSION="0.11.2"])
+AC_MSG_RESULT($PPL_VERSION)
+ANDROID_CHECK_PACKAGE(ppl-${PPL_VERSION})
+fi
+AC_SUBST(PPL_VERSION)
+
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# cloog-ppl or cloog version (default is 0.15.9)
+# cloog is only used for gcc 4.5+ with graphite optimization.
+AC_MSG_CHECKING([cloog version])
+AC_ARG_WITH([cloog-version],
+  [  --with-cloog-version=VERSION
+                          use cloog-VERSION (default is 0.15.9)],
+  [if test x"$withval" != x ; then
+     CLOOG_VERSION="$withval"
+   fi],
+[CLOOG_VERSION="0.15.9"])
+AC_MSG_RESULT($CLOOG_VERSION)
+case $CLOOG_VERSION in
+  0.15*)
+    # CLooG/PPL relies on the PPL for version 0.15.x
+    CLOOG_VERSION="ppl-$CLOOG_VERSION"
+    ;;
+  0.16*)
+    # CLooG 0.16.x has its own embedded polyhedral library
+    ;;
+  *)
+    AC_MSG_ERROR(Unsupported cloog version);
+esac
+ANDROID_CHECK_PACKAGE(cloog-${CLOOG_VERSION})
+fi
+AC_SUBST(CLOOG_VERSION)
+
 # gdb version (default is 6.6)
 AC_MSG_CHECKING([target gdb version to build])
 AC_ARG_WITH([gdb-version],
@@ -443,5 +499,31 @@ AC_ARG_WITH(gmp, [  --with-gmp=PATH
    fi],
   [have_gmp=no])
 AC_SUBST(have_gmp)
+
+# Specify a location for ppl
+AC_ARG_WITH(ppl, [  --with-ppl=PATH
+                          specify prefix directory for the installed PPL package.],
+  [if test -d "$withval" ; then
+     have_ppl="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-ppl)
+   else
+     have_ppl=no
+   fi],
+  [have_ppl=no])
+AC_SUBST(have_ppl)
+
+# Specify a location for cloog
+AC_ARG_WITH(cloog, [  --with-cloog=PATH
+                          specify prefix directory for the installed CLooG package.],
+  [if test -d "$withval" ; then
+     have_cloog="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-cloog)
+   else
+     have_cloog=no
+   fi],
+  [have_cloog=no])
+AC_SUBST(have_cloog)
 
 AC_OUTPUT

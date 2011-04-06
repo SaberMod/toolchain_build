@@ -271,7 +271,7 @@ PACKAGE_VERSION='2.0'
 PACKAGE_STRING='android-tools 2.0'
 PACKAGE_BUGREPORT=''
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION GDB_VERSION sysroot have_mpc have_mpfr have_gmp LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA BUILD_ANDROID_GCC GDB_TARGET TOPLEVEL_CONFIGURE_ARGUMENTS baseargs gold_baseargs ENABLE_GRAPHITE package_to_srcdir BINUTILS_VERSION GOLD_VERSION GCC_VERSION GCC_MIN_VERSION_4_3_0 GCC_MIN_VERSION_4_5_0 NEWLIB_VERSION GMP_VERSION MPFR_VERSION MPC_VERSION PPL_VERSION CLOOG_VERSION GDB_VERSION sysroot have_mpc have_mpfr have_gmp have_ppl have_cloog LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -791,6 +791,11 @@ if test -n "$ac_init_help"; then
    esac
   cat <<\_ACEOF
 
+Optional Features:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-graphite       Enable Graphite optimization [default=no]
+
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
@@ -808,6 +813,10 @@ Optional Packages:
                           use mpfr-VERSION (default is 2.3.0)
   --with-mpc-version=VERSION
                           use mpc-VERSION (default is 0.8.1)
+  --with-ppl-version=VERSION
+                          use ppl-VERSION (default is 0.11.2)
+  --with-cloog-version=VERSION
+                          use cloog-VERSION (default is 0.15.9)
   --with-gdb-version=VERSION
                           use gdb-VERSION (default is 6.6)
   --with-sysroot=DIR
@@ -818,6 +827,10 @@ Optional Packages:
                           specify prefix directory for installed MPFR package.
   --with-gmp=PATH
                           specify prefix directory for the installed GMP package.
+  --with-ppl=PATH
+                          specify prefix directory for the installed PPL package.
+  --with-cloog=PATH
+                          specify prefix directory for the installed CLooG package.
 
 _ACEOF
 fi
@@ -1644,6 +1657,21 @@ done
 
 
 
+ENABLE_GRAPHITE=no
+# Check whether --enable-graphite or --disable-graphite was given.
+if test "${enable_graphite+set}" = set; then
+  enableval="$enable_graphite"
+
+fi;
+if test x${enableval} != xyes; then
+  graphite=no
+fi
+if test "$GCC_MIN_VERSION_4_5_0" == "no"; then
+  graphite=no
+fi
+ENABLE_GRAPHITE=$graphite
+
+
 # package to source path
 case $srcdir in
  /* | A-Za-z:*) package_to_srcdir=$srcdir ;;
@@ -1991,6 +2019,107 @@ fi
 fi
 
 
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# ppl version (default is 0.11.2)
+# ppl is only used for gcc 4.5+ with graphite optimization.
+echo "$as_me:$LINENO: checking ppl version" >&5
+echo $ECHO_N "checking ppl version... $ECHO_C" >&6
+
+# Check whether --with-ppl-version or --without-ppl-version was given.
+if test "${with_ppl_version+set}" = set; then
+  withval="$with_ppl_version"
+  if test x"$withval" != x ; then
+     PPL_VERSION="$withval"
+   fi
+else
+  PPL_VERSION="0.11.2"
+fi;
+echo "$as_me:$LINENO: result: $PPL_VERSION" >&5
+echo "${ECHO_T}$PPL_VERSION" >&6
+x=ppl-${PPL_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/ppl-${PPL_VERSION} \) -a \( x"$version" != x"none"  \) ; then
+  if test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/ppl-${PPL_VERSION}.tar
+  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/ppl-${PPL_VERSION}.tar.gz
+  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/ppl-${PPL_VERSION}.tgz
+  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/ppl-${PPL_VERSION}.tar.bz2
+  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar
+  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.gz
+  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/ppl-${PPL_VERSION}.tgz
+  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.bz2
+  else
+    { { echo "$as_me:$LINENO: error: 'package ppl-${PPL_VERSION} does not exist.'" >&5
+echo "$as_me: error: 'package ppl-${PPL_VERSION} does not exist.'" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+fi
+fi
+
+
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# cloog-ppl or cloog version (default is 0.15.9)
+# cloog is only used for gcc 4.5+ with graphite optimization.
+echo "$as_me:$LINENO: checking cloog version" >&5
+echo $ECHO_N "checking cloog version... $ECHO_C" >&6
+
+# Check whether --with-cloog-version or --without-cloog-version was given.
+if test "${with_cloog_version+set}" = set; then
+  withval="$with_cloog_version"
+  if test x"$withval" != x ; then
+     CLOOG_VERSION="$withval"
+   fi
+else
+  CLOOG_VERSION="0.15.9"
+fi;
+echo "$as_me:$LINENO: result: $CLOOG_VERSION" >&5
+echo "${ECHO_T}$CLOOG_VERSION" >&6
+case $CLOOG_VERSION in
+  0.15*)
+    # CLooG/PPL relies on the PPL for version 0.15.x
+    CLOOG_VERSION="ppl-$CLOOG_VERSION"
+    ;;
+  0.16*)
+    # CLooG 0.16.x has its own embedded polyhedral library
+    ;;
+  *)
+    { { echo "$as_me:$LINENO: error: Unsupported cloog version" >&5
+echo "$as_me: error: Unsupported cloog version" >&2;}
+   { (exit 1); exit 1; }; };
+esac
+x=cloog-${CLOOG_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/cloog-${CLOOG_VERSION} \) -a \( x"$version" != x"none"  \) ; then
+  if test -f $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar
+  elif test -f $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar.gz
+  elif test -f $srcdir/../$tool/cloog-${CLOOG_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/cloog-${CLOOG_VERSION}.tgz
+  elif test -f $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar.bz2
+  elif test -f $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar
+  elif test -f $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar.gz
+  elif test -f $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tgz
+  elif test -f $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/cloog-${CLOOG_VERSION}.tar.bz2
+  else
+    { { echo "$as_me:$LINENO: error: 'package cloog-${CLOOG_VERSION} does not exist.'" >&5
+echo "$as_me: error: 'package cloog-${CLOOG_VERSION} does not exist.'" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+fi
+fi
+
+
 # gdb version (default is 6.6)
 echo "$as_me:$LINENO: checking target gdb version to build" >&5
 echo $ECHO_N "checking target gdb version to build... $ECHO_C" >&6
@@ -2118,6 +2247,44 @@ echo "$as_me: error: invalid value for --with-gmp" >&2;}
    fi
 else
   have_gmp=no
+fi;
+
+
+# Specify a location for ppl
+
+# Check whether --with-ppl or --without-ppl was given.
+if test "${with_ppl+set}" = set; then
+  withval="$with_ppl"
+  if test -d "$withval" ; then
+     have_ppl="$withval"
+   elif test x"$withval" != x"no"; then
+     { { echo "$as_me:$LINENO: error: invalid value for --with-ppl" >&5
+echo "$as_me: error: invalid value for --with-ppl" >&2;}
+   { (exit 1); exit 1; }; }
+   else
+     have_ppl=no
+   fi
+else
+  have_ppl=no
+fi;
+
+
+# Specify a location for cloog
+
+# Check whether --with-cloog or --without-cloog was given.
+if test "${with_cloog+set}" = set; then
+  withval="$with_cloog"
+  if test -d "$withval" ; then
+     have_cloog="$withval"
+   elif test x"$withval" != x"no"; then
+     { { echo "$as_me:$LINENO: error: invalid value for --with-cloog" >&5
+echo "$as_me: error: invalid value for --with-cloog" >&2;}
+   { (exit 1); exit 1; }; }
+   else
+     have_cloog=no
+   fi
+else
+  have_cloog=no
 fi;
 
 
@@ -2776,6 +2943,7 @@ s,@GDB_TARGET@,$GDB_TARGET,;t t
 s,@TOPLEVEL_CONFIGURE_ARGUMENTS@,$TOPLEVEL_CONFIGURE_ARGUMENTS,;t t
 s,@baseargs@,$baseargs,;t t
 s,@gold_baseargs@,$gold_baseargs,;t t
+s,@ENABLE_GRAPHITE@,$ENABLE_GRAPHITE,;t t
 s,@package_to_srcdir@,$package_to_srcdir,;t t
 s,@BINUTILS_VERSION@,$BINUTILS_VERSION,;t t
 s,@GOLD_VERSION@,$GOLD_VERSION,;t t
@@ -2786,11 +2954,15 @@ s,@NEWLIB_VERSION@,$NEWLIB_VERSION,;t t
 s,@GMP_VERSION@,$GMP_VERSION,;t t
 s,@MPFR_VERSION@,$MPFR_VERSION,;t t
 s,@MPC_VERSION@,$MPC_VERSION,;t t
+s,@PPL_VERSION@,$PPL_VERSION,;t t
+s,@CLOOG_VERSION@,$CLOOG_VERSION,;t t
 s,@GDB_VERSION@,$GDB_VERSION,;t t
 s,@sysroot@,$sysroot,;t t
 s,@have_mpc@,$have_mpc,;t t
 s,@have_mpfr@,$have_mpfr,;t t
 s,@have_gmp@,$have_gmp,;t t
+s,@have_ppl@,$have_ppl,;t t
+s,@have_cloog@,$have_cloog,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
