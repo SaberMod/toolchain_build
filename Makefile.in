@@ -331,7 +331,7 @@ endif
 .PHONY: config-host-libbfd build-host-libbfd install-host-libbfd
 config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
-	--enable-targets=all --host=${host} --build=${build} \
+	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared \
 	--enable-install-libbfd --with-included-gettext
 stmp-config-host-libbfd: config.status
@@ -344,13 +344,15 @@ stmp-config-host-libbfd: config.status
 build-host-libbfd: stmp-build-host-libbfd
 stmp-build-host-libbfd: stmp-config-host-libbfd
 	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd all-libiberty && \
+	$(MAKE) -C libbfd-${BINUTILS_VERSION}/intl libintl.a && \
 	$(STAMP) $@
 # Also include libintl.a.  We have to do this manully since the
 # source of libintl in binutils is modified to not install the library.
 # We build with -m32 always.  To avoid installing libiberty.a into /lib32,
 # we need to manually install the archive.  This will need to be cleaned up.
 install-host-libbfd: stmp-build-host-libbfd install-target-binutils
-	$(MAKE) -C libbfd-${BINUTILS_VERSION} install-bfd install-libiberty && \
+	$(MAKE) -C libbfd-${BINUTILS_VERSION}/bfd install \
+		bfdlibdir=$(libdir) bfdincludedir=$(includedir) && \
 	$(INSTALL) -m 644 libbfd-${BINUTILS_VERSION}/intl/libintl.a \
 		$(libdir) && \
 	$(INSTALL) -m 644 libbfd-${BINUTILS_VERSION}/libiberty/libiberty.a \
