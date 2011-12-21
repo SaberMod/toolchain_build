@@ -57,6 +57,8 @@ baseargs = @baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
 ENABLE_GRAPHITE:=@ENABLE_GRAPHITE@
+BINUTILS_MIN_VERSION_2_21:=@BINUTILS_MIN_VERSION_2_21@
+GOLD_MIN_VERSION_2_21:=@GOLD_MIN_VERSION_2_21@
 PACKAGE_TO_SRCDIR:=@package_to_srcdir@
 BUILD_ANDROID_GCC:=@BUILD_ANDROID_GCC@
 GDB_TARGET:=@GDB_TARGET@
@@ -81,6 +83,7 @@ HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
+ENABLE_GOLD=@enable_gold@
 STAMP=touch
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
@@ -280,6 +283,15 @@ BINUTILS_CONFIG_ARGS+= \
 	'--with-host-libstdcxx=-static-libgcc \
 	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
 endif
+# Enable dual linker support and make gold as default linker when gold is
+# enabled. Notice that our binutils take different --enable-gold=xxx options.
+ifneq ($(ENABLE_GOLD),)
+ifeq ($(BINUTILS_MIN_VERSION_2_21),yes)
+BINUTILS_CONFIG_ARGS += --enable-gold=default
+else
+BINUTILS_CONFIG_ARGS += --enable-gold=both/gold
+endif
+endif
 stmp-config-target-binutils: config.status $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
@@ -304,6 +316,11 @@ config-target-gold: stmp-config-target-gold
 GOLD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared
+ifeq ($(GOLD_MIN_VERSION_2_21),yes)
+	GOLD_CONFIG_ARGS += --enable-gold=default
+else
+	GOLD_CONFIG_ARGS += --enable-gold=both/gold
+endif
 stmp-config-target-gold: config.status
 	([ -d ${GOLD_VERSION} ] || \
 	  mkdir ${GOLD_VERSION}) && \
@@ -390,6 +407,9 @@ GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-ppl=${PPL_DIR} \
 GCC_CONFIG_ARGS += \
 	'--with-host-libstdcxx=-static-libgcc \
 	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
+else
+# Disable ppl and cloog just in case the host have them install.
+GCC_CONFIG_ARGS += --without-ppl --without-cloog
 endif
 
 # Add Android specific gcc options.
@@ -426,6 +446,11 @@ endif
 
 # We add the baseargs and the end so that they override any default args
 GCC_CONFIG_ARGS += $(baseargs)
+
+# Add user specified --enable-gold=xxx option to gcc
+ifneq ($(ENABLE_GOLD),)
+GCC_CONFIG_ARGS += $(ENABLE_GOLD)
+endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
 stmp-config-target-gcc: config.status stmp-build-target-binutils
@@ -586,11 +611,11 @@ install-host-mpc: stmp-install-host-mpc
 .PHONY: config-host-ppl build-host-ppl install-host-ppl
 config-host-ppl: stmp-config-host-ppl
 PPL_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
-		--target=${target_alias} \
-		--host=${host} --build=${build} \
-		--disable-nls --with-gmp-prefix=$(GMP_DIR) \
-		--disable-watchdog \
-		--disable-ppl_lcdd --disable-ppl_lpsol --disable-ppl_pips
+	  --target=${target_alias} \
+	  --host=${host} --build=${build} \
+	  --disable-nls --with-gmp-prefix=$(GMP_DIR) \
+	  --disable-watchdog \
+	  --disable-ppl_lcdd --disable-ppl_lpsol --disable-ppl_pips
 stmp-config-host-ppl: config.status stmp-install-host-gmp
 	([ -d ${PPL_VERSION} ] || \
 	 mkdir ${PPL_VERSION}) && \
@@ -611,19 +636,19 @@ install-host-ppl: stmp-install-host-ppl
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
 CLOOG_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
-       --target=${target_alias} \
-       --host=${host} --build=${build} \
-       --disable-nls \
-       --with-gmp=$(GMP_DIR)
+	  --target=${target_alias} \
+	  --host=${host} --build=${build} \
+	  --disable-nls \
+	  --with-gmp=$(GMP_DIR)
 # for cloog-ppl version 0.15.x, ppl is required.
 ifneq ($(findstring ppl-,$(CLOOG_VERSION)),)
 stmp-config-host-cloog: config.status stmp-install-host-ppl \
-			stmp-install-host-ppl-workaround
+	  stmp-install-host-ppl-workaround
 stmp-install-host-ppl-workaround:
 	# cloog 0.15.9 is unable to detect newer versions of ppl.
 	# Thus we modify the version definition in header file to satisfy.
 	sed -i -e 's/PPL_VERSION_MINOR 11/PPL_VERSION_MINOR 10/' \
-	 $(PPL_DIR)/include/ppl_c.h
+	  $(PPL_DIR)/include/ppl_c.h
 	$(STAMP) $@
 CLOOG_CONFIG_ARGS+= --with-ppl=$(PPL_DIR)
 endif

@@ -15,7 +15,6 @@ AC_INIT(android-tools,2.0)
 AC_PREREQ(2.59)
 
 AC_CONFIG_FILES([Makefile])
-AC_PROG_INSTALL
 
 AC_CANONICAL_SYSTEM
 
@@ -83,6 +82,7 @@ AC_SUBST(TOPLEVEL_CONFIGURE_ARGUMENTS)
 baseargs=
 keep_next=no
 skip_next=no
+enable_gold=
 eval "set -- $ac_configure_args"
 for ac_arg
 do
@@ -139,6 +139,20 @@ do
       continue
       ;;
     -*)
+      # Strip argument from --enable-gold=*, since our binutils and
+      # gcc-4.6 take different arguments for dual linker support. We will
+      # pass --enable-gold=both/gold to binutils and --enable-gold=default
+      # gcc-4.6 if dual linker is needed.
+      case "$ac_arg" in
+        --enable-gold | --enable-gold=* )
+          enable_gold="$ac_arg"
+          ac_arg="--enable-gold"
+          ;;
+        --disable-gold )
+          enable_gold=
+          ;;
+      esac
+
       # An option.  Add it.
       case $ac_arg in
 	*\'*)
@@ -176,6 +190,7 @@ if test "$silent" = yes; then
 fi
 
 AC_SUBST(baseargs)
+AC_SUBST(enable_gold)
 
 # Strip --{enable|disable}-{gold|ld}* from baseargs.  These are used for the
 # gold binutils.  Note that baseargs are quoted.
@@ -261,6 +276,32 @@ AC_MSG_RESULT($BINUTILS_VERSION)
 AC_SUBST(BINUTILS_VERSION)
 ANDROID_CHECK_PACKAGE(binutils-${BINUTILS_VERSION})
 
+m4_pattern_allow(AM_INIT_AUTOMAKE)
+# macro to find binutils version for dual linker support.
+# For binutils-2.21 and up, add --enable-gold=default,
+# else add --enable-gold=both/gold.
+AC_DEFUN([FIND_BINUTILS_VERSION],
+[binutils_version_file="${srcdir}/../binutils/$1/bfd/configure.in"
+if test -f "${binutils_version_file}"; then
+  binutils_version_num=`grep AM_INIT_AUTOMAKE ${binutils_version_file} | \
+                        sed -n "s/[AM_INIT_AUTOMAKE][[^,]]*,*\([[^)]]*\))/\1/p"`
+  BINUTILS_MAJOR=`echo $binutils_version_num | sed -e "s/[[^0-9]].*//"`
+  BINUTILS_MINOR=`echo $binutils_version_num | \
+                  sed  -e "s/^[[0-9]]*\.//" -e "s/[[^0-9]].*//"`
+  if test "$BINUTILS_MAJOR" -gt 2 -o \
+          \( "$BINUTILS_MAJOR" -eq 2 -a "$BINUTILS_MINOR" -ge 21 \); then
+    $2_MIN_VERSION_2_21="yes"
+  else
+    $2_MIN_VERSION_2_21="no"
+  fi
+else
+  # No configure file found. assume yes.
+  $2_MIN_VERSION_2_21="yes"
+fi ])
+
+FIND_BINUTILS_VERSION(binutils-${BINUTILS_VERSION},[BINUTILS])
+AC_SUBST(BINUTILS_MIN_VERSION_2_21)
+
 # gold binutils version (default is the same version as the main
 # binutils package).
 GOLD_VERSION="$BINUTILS_VERSION"
@@ -275,9 +316,12 @@ AC_MSG_RESULT($GOLD_VERSION)
 AC_SUBST(GOLD_VERSION)
 
 # Skip check if we are using the main binutils for gold.
+GOLD_MIN_VERSION_2_21="$BINUTILS_MIN_VERSION_2_21"
 if test x"$GOLD_VERSION" != x"$BINUTILS_VERSION" ; then
   ANDROID_CHECK_PACKAGE(binutils-${GOLD_VERSION})
+  FIND_BINUTILS_VERSION(binutils-${GOLD_VERSION},[GOLD])
 fi
+AC_SUBST(GOLD_MIN_VERSION_2_21)
 
 # gcc version (default is 4.2.1)
 AC_MSG_CHECKING([target gcc version to build])
@@ -387,7 +431,7 @@ if test "$ENABLE_GRAPHITE" == "yes"; then
 AC_MSG_CHECKING([ppl version])
 AC_ARG_WITH([ppl-version],
   [  --with-ppl-version=VERSION
-                          use ppl-VERSION (default is 0.11.2)],
+                         use ppl-VERSION (default is 0.11.2)],
   [if test x"$withval" != x ; then
      PPL_VERSION="$withval"
    fi],
@@ -403,7 +447,7 @@ if test "$ENABLE_GRAPHITE" == "yes"; then
 AC_MSG_CHECKING([cloog version])
 AC_ARG_WITH([cloog-version],
   [  --with-cloog-version=VERSION
-                          use cloog-VERSION (default is 0.15.9)],
+                           use cloog-VERSION (default is 0.15.9)],
   [if test x"$withval" != x ; then
      CLOOG_VERSION="$withval"
    fi],
