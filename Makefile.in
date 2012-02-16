@@ -56,9 +56,10 @@ TOPLEVEL_CONFIGURE_ARGUMENTS:=@TOPLEVEL_CONFIGURE_ARGUMENTS@
 baseargs = @baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
-ENABLE_GRAPHITE:=@ENABLE_GRAPHITE@
+GDB_MIN_VERSION_7_2:=@GDB_MIN_VERSION_7_2@
 BINUTILS_MIN_VERSION_2_21:=@BINUTILS_MIN_VERSION_2_21@
 GOLD_MIN_VERSION_2_21:=@GOLD_MIN_VERSION_2_21@
+ENABLE_GRAPHITE:=@ENABLE_GRAPHITE@
 PACKAGE_TO_SRCDIR:=@package_to_srcdir@
 BUILD_ANDROID_GCC:=@BUILD_ANDROID_GCC@
 GDB_TARGET:=@GDB_TARGET@
@@ -78,11 +79,13 @@ MPC_VERSION=mpc-@MPC_VERSION@
 PPL_VERSION=ppl-@PPL_VERSION@
 CLOOG_VERSION=cloog-@CLOOG_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
+EXPAT_VERSION=expat-@EXPAT_VERSION@
 HAVE_MPC=@have_mpc@
 HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
+HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 STAMP=touch
 
@@ -108,6 +111,10 @@ endif
 
 ifeq ($(HAVE_CLOOG), no)
   CLOOG_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_EXPAT),no)
+  EXPAT_DIR=$(TEMP_INSTALLDIR)
 endif
 
 # Figure out where to find the ld binary.
@@ -417,12 +424,11 @@ endif
 
 
 # Target indenpendent Android gcc options.
-# For now we build a static version of libsupc++.
 ifeq ($(BUILD_ANDROID_GCC),yes)
 GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
 	--enable-threads --disable-nls --disable-libmudflap --disable-libgomp \
-	--disable-sjlj-exceptions --disable-shared \
-	--disable-tls
+	--disable-libstdc__-v3 --disable-sjlj-exceptions --disable-shared \
+	--disable-tls --disable-libitm
 
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
 # ARM specific options.
@@ -430,16 +436,9 @@ ifeq ($(target_cpu),arm)
 GCC_CONFIG_ARGS += --with-float=soft --with-fpu=vfp --with-arch=armv5te \
 	--enable-target-optspace
 
-# Experimental: build libsupc++.a for ARM.
-GCC_CONFIG_ARGS += --disable-hosted-libstdcxx \
-	--enable-cxx-flags="-fexceptions -frtti"
-
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
-
-else
-GCC_CONFIG_ARGS += --disable-libstdc__-v3
 endif
 
 endif
@@ -671,6 +670,31 @@ stmp-install-host-cloog: stmp-build-host-cloog
 	$(STAMP) $@
 install-host-cloog: stmp-install-host-cloog
 
+# host expat rules
+.PHONY: config-host-expat build-host-expat install-host-expat
+config-host-expat: stmp-config-host-expat
+EXPAT_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+	--host=${cur_host} --build=${cur_build}
+stmp-config-host-expat: config.status  $(canadian_stmp)
+	([ -d ${EXPAT_VERSION} ] || \
+	  mkdir ${EXPAT_VERSION}) && \
+	($(canadian_env) \
+	 cd ${EXPAT_VERSION} ; \
+	 $(call find-package-srcdir, ${EXPAT_VERSION})/configure \
+	  $(EXPAT_CONFIG_ARGS)) && \
+	$(STAMP) $@
+stmp-build-host-expat: stmp-config-host-expat
+	($(canadian_env) \
+	 $(MAKE) -C ${EXPAT_VERSION}) && $(STAMP) $@
+build-host-expat: stmp_build-host-expat
+ifeq ($(HAVE_EXPAT),no)
+stmp-install-host-expat: stmp-build-host-expat
+	$(MAKE) -C ${EXPAT_VERSION} install -j1 && $(STAMP) $@
+else
+stmp-install-host-expat:
+endif
+install-host-expat: stmp-install-host-expat
+
 # target gdb rules
 .PHONY: config-target-gdb build-target-gdb install-target-gdb
 ifeq ($(GDB_VERSION),gdb-none)
@@ -683,6 +707,12 @@ config-target-gdb: stmp-config-target-gdb
 GDB_CONFIG_ARGS=$(baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
 	--disable-nls
+
+# For gdb versions 7.2 and higher, expat is required.
+ifeq ($(GDB_MIN_VERSION_7_2),yes)
+stmp-config-target-gdb: stmp-install-host-expat
+GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
+endif
 
 stmp-config-target-gdb: config.status $(canadian_stmp)
 	([ -d ${GDB_VERSION} ] || \
