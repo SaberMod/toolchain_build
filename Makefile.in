@@ -354,12 +354,15 @@ endif
 
 # build libbfd for host.  We configure with all targets, so this is built
 # separately from the same source.
+# Required by Android build, we always build 32bit host libraries, and
+# put the 32bit host libraries into /lib32.
 .PHONY: config-host-libbfd build-host-libbfd install-host-libbfd
 config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared \
-	--enable-install-libbfd --with-included-gettext
+	--enable-install-libbfd --with-included-gettext \
+	CFLAGS=-m32
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
 	  mkdir libbfd-${BINUTILS_VERSION}) && \
@@ -374,15 +377,15 @@ stmp-build-host-libbfd: stmp-config-host-libbfd
 	$(STAMP) $@
 # Also include libintl.a.  We have to do this manully since the
 # source of libintl in binutils is modified to not install the library.
-# We build with -m32 always.  To avoid installing libiberty.a into /lib32,
-# we need to manually install the archive.  This will need to be cleaned up.
+# We build with -m32 always, and install host libs into /lib32.
+LIB32DIR=$(libdir)32
 install-host-libbfd: stmp-build-host-libbfd install-target-binutils
 	$(MAKE) -C libbfd-${BINUTILS_VERSION}/bfd install \
-		bfdlibdir=$(libdir) bfdincludedir=$(includedir) && \
+		bfdlibdir=$(LIB32DIR) bfdincludedir=$(includedir) && \
 	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/intl/libintl.a \
-		$(libdir) && \
+		$(LIB32DIR) && \
 	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/libiberty/libiberty.a \
-		$(libdir)
+		$(LIB32DIR)
 
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
