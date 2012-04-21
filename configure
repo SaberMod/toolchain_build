@@ -2001,7 +2001,7 @@ case $target in
   arm-newlib-elf)
     BUILD_ANDROID_GCC=no
     ;;
-  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu)
+  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu | i[3456]86-*-linux-android | x86_64-*-linux-android)
     BUILD_ANDROID_GCC=yes
     ;;
   *)
