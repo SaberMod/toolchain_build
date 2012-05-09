@@ -362,7 +362,7 @@ LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared \
 	--enable-install-libbfd --with-included-gettext \
-	CFLAGS=-m32
+	CFLAGS="$(CFLAGS) -m32"
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
 	  mkdir libbfd-${BINUTILS_VERSION}) && \
