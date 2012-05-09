@@ -25,7 +25,8 @@ AC_PROG_INSTALL
 # 1. arm-linux-androideabi (primary target)
 # 2. arm-eabi (for Android kernel)
 # 3. arm-newlib-eabi (for gcc testing)
-# 4.i[3456]86-*-linux-gnu, x86-*-linux-gnu (for x86 targets)
+# 4. i[3456]86-*-linux-gnu, x86-*-linux-gnu, i[3456]86-*-linux-android, x86-*-linux-android (for x86 targets)
+# 5. mips*-*-linux* (for mips targets)
 
 GDB_TARGET=$target
 case $target in
@@ -36,8 +37,17 @@ case $target in
   arm-newlib-elf)
     BUILD_ANDROID_GCC=no
     ;;
-  i[[3456]]86-*-linux-gnu | x86_64-*-linux-gnu | i[[3456]]86-*-linux-android | x86_64-*-linux-android)
+  i[[3456]]86-*-linux-gnu | x86_64-*-linux-gnu)
     BUILD_ANDROID_GCC=yes
+    ;;
+  i[[3456]]86-*-linux-android | x86_64-*-linux-android)
+    BUILD_ANDROID_GCC=yes
+    # Change target to *-linux-gnu because linux-android isn't supported until GDB 7.2
+    GDB_TARGET=${target%%-*}-linux-gnu
+    ;;
+  mips*-*-linux*)
+    BUILD_ANDROID_GCC=yes
+    GDB_TARGET=mipsel-linux-gnu
     ;;
   *)
     AC_MSG_ERROR(Unsupported target $target.);
