@@ -2002,17 +2002,11 @@ case $target in
   arm-newlib-elf)
     BUILD_ANDROID_GCC=no
     ;;
-  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu)
+  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu | i[3456]86-*-linux-android | x86_64-*-linux-android)
     BUILD_ANDROID_GCC=yes
-    ;;
-  i[3456]86-*-linux-android | x86_64-*-linux-android)
-    BUILD_ANDROID_GCC=yes
-    # Change target to *-linux-gnu because linux-android isn't supported until GDB 7.2
-    GDB_TARGET=${target%%-*}-linux-gnu
     ;;
   mips*-*-linux*)
     BUILD_ANDROID_GCC=yes
-    GDB_TARGET=mipsel-linux-gnu
     ;;
   *)
     as_fn_error "Unsupported target $target." "$LINENO" 5;
