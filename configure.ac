@@ -87,6 +87,7 @@ baseargs=
 keep_next=no
 skip_next=no
 enable_gold=
+enable_ld_default=
 eval "set -- $ac_configure_args"
 for ac_arg
 do
@@ -155,6 +156,12 @@ do
         --disable-gold )
           enable_gold=
           ;;
+        --enable-ld=default )
+          enable_ld_default=yes
+          ;;
+        --disable-ld )
+          enable_ld_default=
+          ;;
       esac
 
       # An option.  Add it.
@@ -195,6 +202,7 @@ fi
 
 AC_SUBST(baseargs)
 AC_SUBST(enable_gold)
+AC_SUBST(enable_ld_default)
 
 # Strip --{enable|disable}-{gold|ld}* from baseargs.  These are used for the
 # gold binutils.  Note that baseargs are quoted.

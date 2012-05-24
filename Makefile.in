@@ -87,6 +87,7 @@ HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
 HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
+ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
@@ -294,9 +295,15 @@ endif
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
 ifneq ($(ENABLE_GOLD),)
 ifeq ($(BINUTILS_MIN_VERSION_2_21),yes)
+ifeq ($(ENABLE_LD_DEFAULT),)
 BINUTILS_CONFIG_ARGS += --enable-gold=default
+endif
 else
+ifeq ($(ENABLE_LD_DEFAULT),)
 BINUTILS_CONFIG_ARGS += --enable-gold=both/gold
+else
+BINUTILS_CONFIG_ARGS += --enable-gold=both/ld
+endif
 endif
 endif
 stmp-config-target-binutils: config.status $(canadian_stmp)
