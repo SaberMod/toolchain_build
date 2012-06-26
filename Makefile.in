@@ -760,7 +760,8 @@ config-target-gdb: stmp-config-target-gdb
 
 GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
-	--disable-nls --enable-tui
+	--disable-nls \
+        --disable-sim --disable-tui
 
 # For gdb versions 7.2 and higher, expat is required.
 ifeq ($(GDB_MIN_VERSION_7_2),yes)
