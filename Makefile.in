@@ -724,6 +724,11 @@ stmp-config-target-gdb: stmp-install-host-expat
 GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
 endif
 
+# For gdb 7.x, disable python support for now
+ifeq ($(filter gdb-6.%,$(GDB_VERSION)),)
+GDB_CONFIG_ARGS += --with-python=no
+endif
+
 stmp-config-target-gdb: config.status $(canadian_stmp)
 	([ -d ${GDB_VERSION} ] || \
 	  mkdir ${GDB_VERSION}) && \
