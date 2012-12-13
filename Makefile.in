@@ -368,12 +368,12 @@ config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared \
-	--enable-install-libbfd --with-included-gettext \
-	CFLAGS="$(CFLAGS) -m32"
+	--enable-install-libbfd --with-included-gettext
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
 	  mkdir libbfd-${BINUTILS_VERSION}) && \
 	(cd libbfd-${BINUTILS_VERSION} ; \
+	 export CFLAGS="$(CFLAGS) -m32" ; \
 	 $(call find-package-srcdir, ${BINUTILS_VERSION})/configure \
 	  $(LIBBFD_CONFIG_ARGS)) && \
 	$(STAMP) $@
