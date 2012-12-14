@@ -54,6 +54,7 @@ INSTALL:=@INSTALL@
 INSTALL_DATA:=@INSTALL_DATA@
 TOPLEVEL_CONFIGURE_ARGUMENTS:=@TOPLEVEL_CONFIGURE_ARGUMENTS@
 baseargs = @baseargs@
+host_baseargs = @host_baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
 GDB_MIN_VERSION_7_2:=@GDB_MIN_VERSION_7_2@
@@ -367,7 +368,7 @@ endif
 config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
-	$(baseargs) --disable-shared \
+	$(host_baseargs) --disable-shared \
 	--enable-install-libbfd --with-included-gettext
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
@@ -565,7 +566,7 @@ install-target-newlib: stmp-build-target-newlib
 # host gmp rules
 .PHONY: config-host-gmp build-host-gmp install-host-gmp
 config-host-gmp: stmp-config-host-gmp
-GMP_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+GMP_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --host=${cur_host} --build=${cur_build}
 
 ifeq ($(ENABLE_GRAPHITE),yes)
@@ -596,7 +597,7 @@ install-host-gmp: stmp-install-host-gmp
 # host mpfr rules
 .PHONY: config-host-mpfr build-host-mpfr install-host-mpfr
 config-host-mpfr: stmp-config-host-mpfr
-MPFR_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+MPFR_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --host=${cur_host} --build=${cur_build} \
 	  --with-gmp=$(GMP_DIR)
 stmp-config-host-mpfr: config.status stmp-install-host-gmp
@@ -622,7 +623,7 @@ install-host-mpfr: stmp-install-host-mpfr
 # host mpc rules
 .PHONY: config-host-mpc build-host-mpc install-host-mpc
 config-host-mpc: stmp-config-host-mpc
-MPC_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+MPC_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	 --host=${cur_host} --build=${cur_build} \
 	 --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
 stmp-config-host-mpc: config.status stmp-install-host-gmp stmp-install-host-mpfr
@@ -648,7 +649,7 @@ install-host-mpc: stmp-install-host-mpc
 # host ppl rules
 .PHONY: config-host-ppl build-host-ppl install-host-ppl
 config-host-ppl: stmp-config-host-ppl
-PPL_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+PPL_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --target=${target_alias} \
 	  --host=${host} --build=${build} \
 	  --disable-nls --with-gmp-prefix=$(GMP_DIR) \
@@ -673,7 +674,7 @@ install-host-ppl: stmp-install-host-ppl
 # host cloog rules
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
-CLOOG_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+CLOOG_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --target=${target_alias} \
 	  --host=${host} --build=${build} \
 	  --disable-nls \
@@ -712,7 +713,7 @@ install-host-cloog: stmp-install-host-cloog
 # host expat rules
 .PHONY: config-host-expat build-host-expat install-host-expat
 config-host-expat: stmp-config-host-expat
-EXPAT_CONFIG_ARGS=$(baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+EXPAT_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	--host=${cur_host} --build=${cur_build}
 stmp-config-host-expat: config.status  $(canadian_stmp)
 	([ -d ${EXPAT_VERSION} ] || \
@@ -743,7 +744,7 @@ install-target-gdb:
 else
 config-target-gdb: stmp-config-target-gdb
 
-GDB_CONFIG_ARGS=$(baseargs) --prefix=$(prefix) \
+GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
 	--disable-nls
 

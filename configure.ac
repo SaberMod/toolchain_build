@@ -204,22 +204,27 @@ AC_SUBST(baseargs)
 AC_SUBST(enable_gold)
 AC_SUBST(enable_ld_default)
 
-# Strip --{enable|disable}-{gold|ld}* from baseargs.  These are used for the
-# gold binutils.  Note that baseargs are quoted.
-gold_baseargs=
+# Strip --with-sysroot, which is really "target" sysroot, from baseargs
+# to form host_baseargs for building host libraries.  Passing target
+# --with-sysroot is detrimantal (*1). Invent a new option
+# --with-host-sysroot if needed in the future.
+# Note that baseargs are quoted.
+#
+# (*1) path dependency_libs= in .libs/libgmpxx.lai has '=' prefix!
+#
+host_baseargs=
 for ac_arg in $baseargs
 do
   case $ac_arg in
-  \'--enable-gold\' | \'--enable-gold=*\' | \'--disable-gold\' | \
-   \'--enable-ld\' | \'--enable-ld=*\' | \'--disable-ld\' )
+  \'--with-sysroot=*\' )
     ;;
   *)
-    gold_baseargs="$gold_baseargs $ac_arg"
+    host_baseargs="$host_baseargs $ac_arg"
     ;;
   esac
 done
 
-AC_SUBST(gold_baseargs)
+AC_SUBST(host_baseargs)
 
 ENABLE_GRAPHITE=no
 AC_ARG_ENABLE([graphite],
