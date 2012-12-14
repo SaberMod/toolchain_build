@@ -563,6 +563,7 @@ EXPAT_VERSION
 GDB_MIN_VERSION_7_2
 GDB_VERSION
 CLOOG_VERSION
+CLOOG_BACKEND
 PPL_VERSION
 MPC_VERSION
 MPFR_VERSION
@@ -2206,6 +2207,7 @@ if test "${enable_graphite+set}" = set; then :
   enableval=$enable_graphite;
 fi
 
+graphite=yes
 if test x${enableval} != xyes; then
   graphite=no
 fi
@@ -2656,8 +2658,9 @@ case $CLOOG_VERSION in
     # CLooG/PPL relies on the PPL for version 0.15.x
     CLOOG_VERSION="ppl-$CLOOG_VERSION"
     ;;
-  0.16*)
-    # CLooG 0.16.x has its own embedded polyhedral library
+  0.16*|0.17*)
+    # CLooG 0.16+ has its own embedded polyhedral library
+    CLOOG_BACKEND="--enable-cloog-backend=isl"
     ;;
   *)
     as_fn_error "Unsupported cloog version" "$LINENO" 5;

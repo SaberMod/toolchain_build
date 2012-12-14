@@ -230,6 +230,7 @@ ENABLE_GRAPHITE=no
 AC_ARG_ENABLE([graphite],
               AC_HELP_STRING([--enable-graphite],
                              [Enable Graphite optimization @<:@default=no@:>@]))
+graphite=yes
 if test x${enableval} != xyes; then
   graphite=no
 fi
@@ -475,12 +476,14 @@ case $CLOOG_VERSION in
     # CLooG/PPL relies on the PPL for version 0.15.x
     CLOOG_VERSION="ppl-$CLOOG_VERSION"
     ;;
-  0.16*)
-    # CLooG 0.16.x has its own embedded polyhedral library
+  0.16*|0.17*)
+    # CLooG 0.16+ has its own embedded polyhedral library
+    CLOOG_BACKEND="--enable-cloog-backend=isl"
     ;;
   *)
     AC_MSG_ERROR(Unsupported cloog version);
 esac
+AC_SUBST(CLOOG_BACKEND)
 ANDROID_CHECK_PACKAGE(cloog-${CLOOG_VERSION})
 fi
 AC_SUBST(CLOOG_VERSION)
