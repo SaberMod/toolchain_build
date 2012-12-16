@@ -382,7 +382,8 @@ config-host-libbfd: stmp-config-host-libbfd
 LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(host_baseargs) --disable-shared \
-	--enable-install-libbfd --with-included-gettext
+	--enable-install-libbfd --with-included-gettext \
+	--disable-werror
 stmp-config-host-libbfd: config.status
 	([ -d libbfd-${BINUTILS_VERSION} ] || \
 	  mkdir libbfd-${BINUTILS_VERSION}) && \
