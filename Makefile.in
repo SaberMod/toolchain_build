@@ -667,7 +667,7 @@ config-host-ppl: stmp-config-host-ppl
 PPL_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
 	  --target=${target_alias} \
 	  --host=${host} --build=${build} \
-	  --disable-nls --with-libgmp-prefix=$(GMP_DIR) \
+	  --disable-nls \
 	  --disable-watchdog --without-java \
 	  --disable-ppl_lcdd --disable-ppl_lpsol --disable-ppl_pips
 stmp-config-host-ppl: config.status stmp-install-host-gmp
@@ -677,6 +677,7 @@ stmp-config-host-ppl: config.status stmp-install-host-gmp
 	 cd ${PPL_VERSION} ; \
          export CFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
          export CXXFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
+         export LDFLAGS="${LDFLAGS} -L$(GMP_DIR)/lib" ; \
 	$(call find-package-srcdir, ${PPL_VERSION})/configure \
 	 $(PPL_CONFIG_ARGS)) && \
 	$(STAMP) $@
