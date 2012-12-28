@@ -292,7 +292,8 @@ BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-gmp=${GMP_DIR} \
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS+= \
 	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
+	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	 --with-gold-ldflags='-static-libgcc -static-libstdc++'
 else
 # In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
 # "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
