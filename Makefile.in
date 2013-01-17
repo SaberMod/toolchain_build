@@ -190,10 +190,14 @@ endif
 
 # Define environment variables for canadian cross build.
 ifneq ($(cur_host),$(cur_build))
+CFLAGS_FOR_BUILD ?= $(CFLAGS)
+LDFLAGS_FOR_BUILD ?= $(LDFLAGS)
 canadian_build_env := \
 	export CC_FOR_BUILD=$(cur_build)-gcc ; \
 	export CC=$(cur_build)-gcc ; \
-	export CXX=$(cur_build)-g++ ;
+	export CXX=$(cur_build)-g++ ; \
+	export CFLAGS="$(CFLAGS_FOR_BUILD)" ; \
+	export LDFLAGS="$(LDFLAGS_FOR_BUILD)" ;
 
 CANADIAN_ROOT := $(PWD)/host-${cur_build}
 canadian_env := \
