@@ -253,7 +253,7 @@ install-canadian-tools: stmp-install-canadian-tools
 stmp-install-canadian-tools: stmp-build-canadian-tools
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
-	 $(MAKE) install prefix=$(CANADIAN_ROOT)/install) && \
+	 $(MAKE) -j1 install prefix=$(CANADIAN_ROOT)/install) && \
 	$(STAMP) $@
 
 # When building canadian cross toolchain we cannot build GCC target libraries.
