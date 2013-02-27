@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#Make a clean build always
+if [ -e Makefile ]
+then
+    make -j10 distclean
+fi;
+
+#PPL
+mkdir -p /home/sparksco/android/toolchain/aosp/build/temp-install/include;
+cp /usr/include/x86_64-linux-gnu/ppl_c.h /home/sparksco/android/toolchain/aosp/build/temp-install/include/ppl_c.h;
+
+#Make a clean install always
+if [ -d /home/sparksco/android/arm-eabi ]
+then
+    rm -rf /home/sparksco/android/arm-eabi
+fi;
+
+#Build Configuration
+./configure --prefix=/home/sparksco/android/arm-eabi --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.22 --with-gmp-version=5.0.5 --with-mpfr-version=3.1.1 --with-mpc-version=1.0.1 --with-gdb-version=7.5.1 --disable-tui --with-pkgversion=SM-Toolchain --with-sysroot=/ --disable-libquadmath --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-multilib --enable-graphite=yes --with-ppl-version=1.0 --with-cloog-version=0.18.0;
+
+#Build the toolchain
+make -j10;
+
+#Install the toolchain twice to make sure everything gets installed
+make -j10 install && make -j10 install
