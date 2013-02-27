@@ -17,7 +17,7 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/home/sparksco/android/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.22 --with-gold-version=2.22 --enable-plugins --with-gmp-version=5.0.5 --with-mpfr-version=3.1.1 --with-mpc-version=1.0.1 --with-gdb-version=7.5.1 --enable-tui --with-pkgversion=SM-Toolchain --with-sysroot=/ --disable-libquadmath --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-graphite=yes --with-ppl-version=1.0 --with-cloog-version=0.17.0;
+./configure --prefix=/home/sparksco/android/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.22 --with-gold-version=2.22  -enable-gold --enable-gold=default --enable-plugins --with-gmp-version=5.0.5 --with-mpfr-version=3.1.1 --with-mpc-version=1.0.1 --with-gdb-version=7.5.1 --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0;
 
 #Build the toolchain
 make -j10;
