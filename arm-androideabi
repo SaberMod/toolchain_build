@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Copyright (C) 2013 The SaberMod Project
+
+#Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+#Make a clean build
+if [ -e Makefile ];
+then
+    make -j10 distclean
+fi;
+
+#PPL
+mkdir -p /home/sparksco/android/toolchain/aosp/build/temp-install/include;
+cp /usr/include/x86_64-linux-gnu/ppl_c.h /home/sparksco/android/toolchain/aosp/build/temp-install/include/ppl_c.h;
+
+#Make a clean install always
+if [ -d /home/sparksco/android/arm-linux-androideabi ]
+then
+    rm -rf /home/sparksco/android/arm-linux-androideabi
+fi;
+
+#Build Configuration
+./configure --prefix=/home/sparksco/android/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.22 --with-gold-version=2.22 --enable-plugins --with-gmp-version=5.0.5 --with-mpfr-version=3.1.1 --with-mpc-version=1.0.1 --with-gdb-version=7.5.1 --enable-tui --with-pkgversion=SM-Toolchain --with-sysroot=/ --disable-libquadmath --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-graphite=yes --with-ppl-version=1.0 --with-cloog-version=0.17.0;
+
+#Build the toolchain
+make -j10;
+
+#Install the toolchain twice to make sure everything gets installed
+make -j10 install && make -j10 install
