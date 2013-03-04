@@ -461,7 +461,7 @@ ifeq ($(BUILD_ANDROID_GCC),yes)
 GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
 	--enable-threads --disable-nls --disable-libmudflap --enable-libgomp \
 	--disable-libstdc__-v3 --disable-sjlj-exceptions --disable-shared \
-	--disable-tls --disable-libitm --disable-libquadmath --disable-libatomic
+	--disable-tls --disable-libitm --disable-libquadmath
 
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
 
