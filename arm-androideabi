@@ -9,13 +9,10 @@ fi;
 #PPL
 mkdir -p /home/sparksco/android/toolchain/aosp/build/temp-install/include;
 cp /usr/include/x86_64-linux-gnu/ppl_c.h /home/sparksco/android/toolchain/aosp/build/temp-install/include/ppl_c.h;
-export PATH=$PATH:/usr/include/x86_64-linux-gnu;
-export PATH=$PATH:/usr/lib/x86_64-linux-gnu;
-
-#libgomp needs this
-export PATH=$PATH:/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/lib:/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/include;
-export LIBRARY_PATH=/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/lib;
-export CPATH=/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/include/linux;
+export PATH=$PATH:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/lib:/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/include;
+export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu;
+export CPATH=/usr/include/x86_64-linux-gnu;
+export ENABLE_GRAPHITE=yes;
 
 #Make a clean install always
 if [ -d /home/sparksco/android/arm-linux-androideabi ]
@@ -24,7 +21,7 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/home/sparksco/android/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.21 --with-gold-version=2.21 --enable-gold=default --enable-plugins --with-gmp-version=4.3.2 --with-mpfr-version=2.4.2 --with-mpc-version=1.0.1 --with-gdb-version=7.3.x --with-sysroot=/home/sparksco/android/ndk/platforms/android-14/arch-arm/usr/include/sys --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --enable-threads=posix;
+./configure --prefix=/home/sparksco/android/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.21 --with-gold-version=2.21 --enable-gold=default --enable-plugins --with-gmp-version=4.3.2 --with-mpfr-version=2.4.2 --with-mpc-version=1.0.1 --with-gdb-version=7.3.x --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --enable-threads=posix;
 
 #Build the toolchain
 make -j10;
