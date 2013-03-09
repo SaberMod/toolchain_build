@@ -18,5 +18,5 @@ fi;
 #Build the toolchain
 make -j10;
 
-#Install the toolchain twice to make sure everything gets installed
-make -j10 install && make -j10 install
+#Install the toolchain
+make install
