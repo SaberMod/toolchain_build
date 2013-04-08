@@ -57,6 +57,7 @@ baseargs = @baseargs@
 host_baseargs = @host_baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
+GCC_MIN_VERSION_4_8_0:=@GCC_MIN_VERSION_4_8_0@
 GDB_MIN_VERSION_7_2:=@GDB_MIN_VERSION_7_2@
 BINUTILS_MIN_VERSION_2_21:=@BINUTILS_MIN_VERSION_2_21@
 GOLD_MIN_VERSION_2_21:=@GOLD_MIN_VERSION_2_21@
@@ -80,6 +81,7 @@ MPFR_VERSION=mpfr-@MPFR_VERSION@
 MPC_VERSION=mpc-@MPC_VERSION@
 PPL_VERSION=ppl-@PPL_VERSION@
 CLOOG_VERSION=cloog-@CLOOG_VERSION@
+ISL_VERSION=isl-@ISL_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
 EXPAT_VERSION=expat-@EXPAT_VERSION@
 HAVE_MPC=@have_mpc@
@@ -87,6 +89,7 @@ HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
+HAVE_ISL=@have_isl@
 HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
@@ -114,6 +117,10 @@ endif
 
 ifeq ($(HAVE_CLOOG), no)
   CLOOG_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifeq ($(HAVE_ISL), no)
+  ISL_DIR=$(TEMP_INSTALLDIR)
 endif
 
 ifeq ($(HAVE_EXPAT),no)
@@ -293,8 +300,8 @@ BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
 	$(baseargs) --disable-shared --disable-nls
 ifeq ($(ENABLE_GRAPHITE),yes)
-BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-gmp=${GMP_DIR} \
-	--disable-ppl-version-check --disable-cloog-version-check $(CLOOG_BACKEND)
+BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 # links to the static C++ runtime to avoid depending on the host version
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS+= \
@@ -323,7 +330,7 @@ BINUTILS_CONFIG_ARGS += --enable-gold=both/ld
 endif
 endif
 endif
-stmp-config-target-binutils: config.status stmp-install-host-ppl $(canadian_stmp)
+stmp-config-target-binutils: config.status stmp-install-host-ppl stmp-install-host-isl $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
 	($(canadian_env) \
@@ -433,10 +440,11 @@ stmp-config-target-gcc: stmp-install-host-mpc
 GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
 endif
 
-# For gcc 4.5+ with graphite optimization, cloog and ppl are required.
+# For gcc 4.5 and 4.6 with graphite optimization, cloog and ppl are required.
+# For gcc 4.8+ with graphite optimization, cloog and isl are required.
 ifeq ($(ENABLE_GRAPHITE),yes)
-GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-ppl=${PPL_DIR} \
-	--disable-ppl-version-check --disable-cloog-version-check $(CLOOG_BACKEND)
+GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-ppl=${PPL_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 # links to the static C++ runtime to avoid depending on the host version
 ifneq ($(host_os),darwin)
 GCC_CONFIG_ARGS += \
@@ -449,8 +457,8 @@ else
 GCC_CONFIG_ARGS += '--with-host-libstdcxx=-static-libgcc -lstdc++ -lm'
 endif
 else
-# Disable ppl and cloog just in case the host have them install.
-GCC_CONFIG_ARGS += --without-ppl --without-cloog
+# Disable ppl, isl and cloog just in case the host have them install.
+GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
 
 # Add Android specific gcc options.
@@ -491,7 +499,7 @@ GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
-stmp-config-target-gcc: config.status stmp-install-host-ppl stmp-build-target-binutils
+stmp-config-target-gcc: config.status stmp-install-host-ppl stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
 	([ -d ${GCC_VERSION} ] || \
 	  mkdir ${GCC_VERSION}) && \
 	($(canadian_env) \
@@ -679,6 +687,38 @@ stmp-install-host-ppl:
 endif
 install-host-ppl: stmp-install-host-ppl
 
+# host isl rules
+.PHONY: config-host-isl build-host-isl install-host-isl
+config-host-isl: stmp-config-host-isl
+ISL_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+	  --target=${target_alias} \
+	  --host=${host} --build=${build} \
+	  --disable-nls
+stmp-config-host-isl: config.status stmp-install-host-gmp
+	([ -d ${ISL_VERSION} ] || \
+	 mkdir ${ISL_VERSION}) && \
+	($(canadian_env) \
+	 cd ${ISL_VERSION} ; \
+         export CFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
+         export CXXFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
+         export LDFLAGS="${LDFLAGS} -L$(GMP_DIR)/lib" ; \
+	$(call find-package-srcdir, ${ISL_VERSION})/configure \
+	 $(ISL_CONFIG_ARGS)) && \
+	$(STAMP) $@
+stmp-build-host-isl: stmp-config-host-isl
+	$(MAKE) -C ${ISL_VERSION} && $(STAMP) $@
+build-host-isl: stmp-build-host-isl
+
+ifeq ($(ENABLE_GRAPHITE)$(GCC_MIN_VERSION_4_8_0),yesyes)
+stmp-install-host-isl: stmp-build-host-isl
+	$(MAKE) -C ${ISL_VERSION} install && \
+	$(STAMP) $@
+else
+stmp-install-host-isl:
+	$(STAMP) $@
+endif
+install-host-isl: stmp-install-host-isl
+
 # host cloog rules
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
@@ -715,6 +755,8 @@ stmp-build-host-cloog: stmp-config-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} $(CLOOG_TARGET) && \
 	$(STAMP) $@
 build-host-cloog: stmp-build-host-cloog
+
+ifeq ($(ENABLE_GRAPHITE),yes)
 stmp-install-host-cloog: stmp-build-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
@@ -722,7 +764,14 @@ ifeq ($(findstring ppl-,$(CLOOG_VERSION)),)
 	$(MAKE) -C ${CLOOG_VERSION}/isl install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
 endif
+ifeq ($(GCC_MIN_VERSION_4_8_0),yes)
+	$(MAKE) -C ${CLOOG_VERSION} install
+endif
 	$(STAMP) $@
+else
+stmp-install-host-cloog:
+	$(STAMP) $@
+endif
 install-host-cloog: stmp-install-host-cloog
 
 # host expat rules
