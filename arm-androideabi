@@ -9,7 +9,7 @@ fi;
 #PPL
 mkdir -p ~/android/toolchain/build/temp-install/include;
 cp /usr/include/x86_64-linux-gnu/ppl_c.h ~/android/toolchain/build/temp-install/include/ppl_c.h;
-export PATH=$PATH:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:~/android/ndk/platforms/android-14/arch-arm/usr/lib:~/android/ndk/platforms/android-14/arch-arm/usr/include;
+export PATH=$PATH:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
 export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu;
 export CPATH=/usr/include/x86_64-linux-gnu;
 export ENABLE_GRAPHITE=yes;
