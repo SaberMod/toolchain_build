@@ -21,7 +21,7 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.21 --with-gold-version=2.21 --enable-gold=default --enable-plugins --with-gmp-version=4.3.2 --with-mpfr-version=2.4.2 --with-mpc-version=1.0.1 --with-gdb-version=7.3.x --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --enable-threads=posix
+./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.21 --with-gold-version=2.21 --enable-gold=default --enable-plugins --with-gmp-version=4.3.2 --with-mpfr-version=2.4.2 --with-mpc-version=1.0.1 --with-gdb-version=7.3.x --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --enable-threads=posix --disable-libquadmath
 
 #Build the toolchain
 make -j10;
