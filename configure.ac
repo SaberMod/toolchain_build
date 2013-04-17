@@ -372,13 +372,21 @@ if test -f "${gcc_version_file}"; then
   else
     GCC_MIN_VERSION_4_5_0="no"
   fi
+  if test "$GCC_MAJOR" -gt 4 -o \
+              \( "$GCC_MAJOR" -eq 4 -a "$GCC_MINOR" -ge 8 \) ; then
+    GCC_MIN_VERSION_4_8_0="yes"
+  else
+    GCC_MIN_VERSION_4_8_0="no"
+  fi
 else
   # No version file, assume it is trunk
   GCC_MIN_VERSION_4_3_0="yes"
   GCC_MIN_VERSION_4_5_0="yes"
+  GCC_MIN_VERSION_4_8_0="yes"
 fi
 AC_SUBST(GCC_MIN_VERSION_4_3_0)
 AC_SUBST(GCC_MIN_VERSION_4_5_0)
+AC_SUBST(GCC_MIN_VERSION_4_8_0)
 
 # newlib version (default is 1.16.0)
 # newlib is only used for arm-newlib-eabi for testing
@@ -445,7 +453,7 @@ AC_SUBST(MPC_VERSION)
 
 if test "$ENABLE_GRAPHITE" == "yes"; then
 # ppl version (default is 0.11.2)
-# ppl is only used for gcc 4.5+ with graphite optimization.
+# ppl is only used for gcc 4.5 and 4.6 with graphite optimization.
 AC_MSG_CHECKING([ppl version])
 AC_ARG_WITH([ppl-version],
   [  --with-ppl-version=VERSION
@@ -487,6 +495,22 @@ AC_SUBST(CLOOG_BACKEND)
 ANDROID_CHECK_PACKAGE(cloog-${CLOOG_VERSION})
 fi
 AC_SUBST(CLOOG_VERSION)
+
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# isl version (default is 0.11.1)
+# isl is only used for gcc 4.8+ with graphite optimization.
+AC_MSG_CHECKING([isl version])
+AC_ARG_WITH([isl-version],
+  [  --with-isl-version=VERSION
+                         use isl-VERSION (default is 0.11.1)],
+  [if test x"$withval" != x ; then
+     ISL_VERSION="$withval"
+   fi],
+[ISL_VERSION="0.11.1"])
+AC_MSG_RESULT($ISL_VERSION)
+ANDROID_CHECK_PACKAGE(isl-${ISL_VERSION})
+fi
+AC_SUBST(ISL_VERSION)
 
 # gdb version (default is 6.6)
 AC_MSG_CHECKING([target gdb version to build])
@@ -636,6 +660,19 @@ AC_ARG_WITH(cloog, [  --with-cloog=PATH
    fi],
   [have_cloog=no])
 AC_SUBST(have_cloog)
+
+# Specify a location for isl
+AC_ARG_WITH(isl, [  --with-isl=PATH
+                          specify prefix directory for the installed ISL package.],
+  [if test -d "$withval" ; then
+     have_isl="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-isl)
+   else
+     have_isl=no
+   fi],
+  [have_isl=no])
+AC_SUBST(have_isl)
 
 # Specify a location for expat
 AC_ARG_WITH(expat, [  --with-expat=PATH

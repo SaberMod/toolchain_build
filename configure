@@ -554,6 +554,7 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 have_expat
 have_cloog
+have_isl
 have_ppl
 have_gmp
 have_mpfr
@@ -564,11 +565,13 @@ GDB_MIN_VERSION_7_2
 GDB_VERSION
 CLOOG_VERSION
 CLOOG_BACKEND
+ISL_VERSION
 PPL_VERSION
 MPC_VERSION
 MPFR_VERSION
 GMP_VERSION
 NEWLIB_VERSION
+GCC_MIN_VERSION_4_8_0
 GCC_MIN_VERSION_4_5_0
 GCC_MIN_VERSION_4_3_0
 GCC_VERSION
@@ -651,6 +654,7 @@ with_mpfr_version
 with_mpc_version
 with_ppl_version
 with_cloog_version
+with_isl_version
 with_gdb_version
 with_expat_version
 with_sysroot
@@ -659,6 +663,7 @@ with_mpfr
 with_gmp
 with_ppl
 with_cloog
+with_isl
 with_expat
 '
       ac_precious_vars='build_alias
@@ -1304,9 +1309,11 @@ Optional Packages:
   --with-mpc-version=VERSION
                           use mpc-VERSION (default is 0.8.1)
   --with-ppl-version=VERSION
-                         use ppl-VERSION (default is 0.11.2)
+                          use ppl-VERSION (default is 0.11.2)
   --with-cloog-version=VERSION
-                           use cloog-VERSION (default is 0.15.9)
+                          use cloog-VERSION (default is 0.15.9)
+  --with-isl-version=VERSION
+                          use isl-VERSION (default is 0.11.1)
   --with-gdb-version=VERSION
                           use gdb-VERSION (default is 6.6)
   --with-expat-version=VERSION
@@ -1323,6 +1330,8 @@ Optional Packages:
                           specify prefix directory for the installed PPL package.
   --with-cloog=PATH
                           specify prefix directory for the installed CLooG package.
+  --with-isl=PATH
+                          specify prefix directory for the installed ISL package.
   --with-expat=PATH
                           specify prefix directory for the installed EXPAT package.
 
@@ -2423,10 +2432,17 @@ if test -f "${gcc_version_file}"; then
   else
     GCC_MIN_VERSION_4_5_0="no"
   fi
+  if test "$GCC_MAJOR" -gt 4 -o \
+              \( "$GCC_MAJOR" -eq 4 -a "$GCC_MINOR" -ge 8 \) ; then
+    GCC_MIN_VERSION_4_8_0="yes"
+  else
+    GCC_MIN_VERSION_4_8_0="no"
+  fi
 else
   # No version file, assume it is trunk
   GCC_MIN_VERSION_4_3_0="yes"
   GCC_MIN_VERSION_4_5_0="yes"
+  GCC_MIN_VERSION_4_8_0="yes"
 fi
 
 
@@ -2600,7 +2616,7 @@ fi
 
 if test "$ENABLE_GRAPHITE" == "yes"; then
 # ppl version (default is 0.11.2)
-# ppl is only used for gcc 4.5+ with graphite optimization.
+# ppl is only used for gcc 4.5 and 4.6 with graphite optimization.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking ppl version" >&5
 $as_echo_n "checking ppl version... " >&6; }
 
@@ -2692,6 +2708,49 @@ if test \( ! -d $srcdir/../$tool/cloog-${CLOOG_VERSION} \) -a \( x"$version" != 
   fi
 fi
 fi
+
+
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# isl version (default is 0.11.1)
+# isl is only used for gcc 4.8+ with graphite optimization.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking isl version" >&5
+$as_echo_n "checking isl version... " >&6; }
+
+# Check whether --with-isl-version was given.
+if test "${with_isl_version+set}" = set; then :
+  withval=$with_isl_version; if test x"$withval" != x ; then
+     ISL_VERSION="$withval"
+   fi
+else
+  ISL_VERSION="0.11.1"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ISL_VERSION" >&5
+$as_echo "$ISL_VERSION" >&6; }
+x=isl-${ISL_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
+if test \( ! -d $srcdir/../$tool/isl-${ISL_VERSION} \) -a \( x"$version" != x"none"  \) ; then
+  if test -f $srcdir/../$tool/isl-${ISL_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/isl-${ISL_VERSION}.tar
+  elif test -f $srcdir/../$tool/isl-${ISL_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/isl-${ISL_VERSION}.tar.gz
+  elif test -f $srcdir/../$tool/isl-${ISL_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/isl-${ISL_VERSION}.tgz
+  elif test -f $srcdir/../$tool/isl-${ISL_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/isl-${ISL_VERSION}.tar.bz2
+  elif test -f $srcdir/../tarballs/isl-${ISL_VERSION}.tar ; then
+    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/isl-${ISL_VERSION}.tar
+  elif test -f $srcdir/../tarballs/isl-${ISL_VERSION}.tar.gz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/isl-${ISL_VERSION}.tar.gz
+  elif test -f $srcdir/../tarballs/isl-${ISL_VERSION}.tgz ; then
+    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/isl-${ISL_VERSION}.tgz
+  elif test -f $srcdir/../tarballs/isl-${ISL_VERSION}.tar.bz2 ; then
+    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/isl-${ISL_VERSION}.tar.bz2
+  else
+    as_fn_error "'package isl-${ISL_VERSION} does not exist.'" "$LINENO" 5
+  fi
+fi
+fi
+
 
 
 # gdb version (default is 6.6)
@@ -2914,6 +2973,23 @@ if test "${with_cloog+set}" = set; then :
    fi
 else
   have_cloog=no
+fi
+
+
+
+# Specify a location for isl
+
+# Check whether --with-isl was given.
+if test "${with_isl+set}" = set; then :
+  withval=$with_isl; if test -d "$withval" ; then
+     have_isl="$withval"
+   elif test x"$withval" != x"no"; then
+     as_fn_error "invalid value for --with-isl" "$LINENO" 5
+   else
+     have_isl=no
+   fi
+else
+  have_isl=no
 fi
 
 
