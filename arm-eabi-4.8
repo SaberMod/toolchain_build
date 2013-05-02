@@ -13,7 +13,7 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/tmp/arm-eabi --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.23 --with-gmp-version=5.1.1 --with-mpfr-version=3.1.2 --with-mpc-version=1.0.1 --with-gdb-version=7.6 --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-threads=single
+./configure --prefix=/tmp/arm-eabi --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.23 --with-gold-version=2.23 --enable-gold=default --with-gmp-version=5.1.1 --with-mpfr-version=3.1.2 --with-mpc-version=1.0.1 --with-gdb-version=7.6 --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --with-sysroot=/ --enable-threads=single
 
 #Build the toolchain
 make -j10;
