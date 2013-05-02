@@ -84,6 +84,7 @@ CLOOG_VERSION=cloog-@CLOOG_VERSION@
 ISL_VERSION=isl-@ISL_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
 EXPAT_VERSION=expat-@EXPAT_VERSION@
+WITH_PYTHON=@WITH_PYTHON@
 HAVE_MPC=@have_mpc@
 HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
@@ -125,6 +126,10 @@ endif
 
 ifeq ($(HAVE_EXPAT),no)
   EXPAT_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifneq ($(WITH_PYTHON),)
+  WITH_PYTHON:=--with-python=$(WITH_PYTHON)
 endif
 
 # Figure out where to find the ld binary.
@@ -810,17 +815,12 @@ config-target-gdb: stmp-config-target-gdb
 
 GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
-	--disable-nls
+	$(WITH_PYTHON) --disable-nls
 
 # For gdb versions 7.2 and higher, expat is required.
 ifeq ($(GDB_MIN_VERSION_7_2),yes)
 stmp-config-target-gdb: stmp-install-host-expat
 GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
-endif
-
-# For gdb 7.x, disable python support for now
-ifeq ($(filter gdb-6.%,$(GDB_VERSION)),)
-GDB_CONFIG_ARGS += --with-python=no
 endif
 
 stmp-config-target-gdb: config.status $(canadian_stmp)

@@ -559,6 +559,19 @@ ANDROID_CHECK_PACKAGE(expat-${EXPAT_VERSION})
 fi
 AC_SUBST(EXPAT_VERSION)
 
+if test "$GDB_MIN_VERSION_7_2" == "yes"; then
+AC_MSG_CHECKING([with python])
+AC_ARG_WITH([python],
+  [  --with-python=WITH_PYTHON
+                          use python WITH_PYTHON)],
+  [if test x"$withval" != x ; then
+     WITH_PYTHON="$withval"
+   fi],
+[WITH_PYTHON=""])
+AC_MSG_RESULT($WITH_PYTHON)
+fi
+AC_SUBST(WITH_PYTHON)
+
 # For certain targets, with gdb 7.2+, the proper gdb target is 
 # arm-linux-android.
 if test "$GDB_MIN_VERSION_7_2" == "yes"; then
