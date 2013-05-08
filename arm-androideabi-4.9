@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export CC=gcc-4.8;
+export CXX=g++-4.8;
+
 #Make a clean build
 if [ -e Makefile ];
 then
@@ -13,7 +16,7 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.23 --with-gold-version=2.23 --enable-gold=default --enable-plugins --with-gmp-version=5.1.1 --with-mpfr-version=3.1.2 --with-gdb-version=7.6 --with-mpc-version=1.0.1 --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --with-sysroot=/ --enable-threads=posix --disable-libquadmath --disable-libatomic
+./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.23 --with-gold-version=2.23 --enable-gold=default --enable-plugins --with-gmp-version=5.1.1 --with-mpfr-version=3.1.2 --with-gdb-version=7.6 --with-mpc-version=1.0.1 --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --with-sysroot=/ --enable-threads=posix --disable-libquadmath --disable-libatomic --disable-libsanitizer
 
 #Build the toolchain
 make -j10;
