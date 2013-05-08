@@ -253,8 +253,8 @@ stmp-config-canadian-tools:
 	  mkdir $(CANADIAN_ROOT)) && \
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
-	 $(abs_srcdir)/configure $(baseargs) --build=$(cur_build) \
-		--host=$(cur_build) --target=$(cur_target)) && \
+	 $(abs_srcdir)/configure $(baseargs) --with-gdb-version=none --build=$(cur_build) \
+		--host=$(cur_build) --target=$(cur_target))  && \
 	$(STAMP) $@
 
 build-canadian-tools: stmp-build-canadian-tools
