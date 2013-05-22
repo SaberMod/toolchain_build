@@ -483,6 +483,11 @@ ifeq ($(target_cpu),i686)
 GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=atom --with-fpmath=sse
 endif
 
+ifeq ($(target_cpu),x86_64)
+GCC_CONFIG_ARGS += --with-arch=atom --with-tune=atom --with-fpmath=sse \
+                   --with-multilib-list=m32,m64,mx32
+endif
+
 # ARM specific options.
 ifeq ($(target_cpu),arm)
 GCC_CONFIG_ARGS += --with-float=soft --with-fpu=vfp --with-arch=armv5te \
