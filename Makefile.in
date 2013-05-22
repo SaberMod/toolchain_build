@@ -484,7 +484,7 @@ GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=atom --with-fpmath=sse
 endif
 
 ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=atom --with-tune=atom --with-fpmath=sse \
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-tune=atom --with-fpmath=sse \
                    --with-multilib-list=m32,m64,mx32
 endif
 
