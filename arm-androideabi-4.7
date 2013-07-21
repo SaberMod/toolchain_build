@@ -9,7 +9,7 @@ fi;
 #PPL
 mkdir -p ~/android/toolchain/build/temp-install/include;
 cp /usr/include/x86_64-linux-gnu/ppl_c.h ~/android/toolchain/build/temp-install/include/ppl_c.h;
-export PATH=$PATH:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
+export PATH=$PATH:/usr/include/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu;
 export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu;
 export CPATH=/usr/include/x86_64-linux-gnu;
 export ENABLE_GRAPHITE=yes;
@@ -21,11 +21,11 @@ then
 fi;
 
 #Build Configuration
-./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.21 --with-gold-version=2.21 --enable-gold=default --enable-plugins --with-gmp-version=4.3.2 --with-mpfr-version=2.4.2 --with-mpc-version=1.0.1 --with-gdb-version=7.3.x --with-sysroot=/ --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --enable-threads=posix --disable-libquadmath
+./configure --prefix=/tmp/arm-linux-androideabi --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=2.23 --enable-plugins --with-gmp-version=5.1.1 --with-mpfr-version=3.1.2 --with-gdb-version=7.6 --with-mpc-version=1.0.1 --with-ppl-version=1.0 --with-cloog-version=0.18.0 --enable-graphite=yes --with-sysroot=/ --enable-threads=posix --disable-libquadmath --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gold-version=2.23 --enable-gold --enable-gold=default
 
 #Build the toolchain
 make -j10;
 
-#Install the toolchain twice to make sure everything gets installed
+#Install the toolchain
 make install;
 
