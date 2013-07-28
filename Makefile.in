@@ -492,7 +492,7 @@ endif
 
 # ARM specific options.
 ifeq ($(target_cpu),arm)
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a \
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv5te \
 	--enable-target-optspace
 
 ifneq ($(target_os),linux-androideabi)
