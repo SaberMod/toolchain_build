@@ -2017,7 +2017,7 @@ case $target in
   arm-newlib-elf)
     BUILD_ANDROID_GCC=no
     ;;
-  aarch64-unknown-linux-androideabi)
+  aarch64-unknown-linux-android)
     BUILD_ANDROID_GCC=yes
     GDB_TARGET=aarch64-elf-linux
     ;;
