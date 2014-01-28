@@ -2142,9 +2142,11 @@ do
       # pass --enable-gold=both/gold to binutils and --enable-gold=default
       # gcc-4.6 if dual linker is needed.
       case "$ac_arg" in
-        --enable-gold | --enable-gold=* )
+        --enable-gold=default )
+          enable_gold_default=yes
+          ;;
+        --enable-gold )
           enable_gold="$ac_arg"
-          ac_arg="--enable-gold"
           ;;
         --disable-gold )
           enable_gold=
