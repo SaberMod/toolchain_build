@@ -95,6 +95,7 @@ HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
+MAKEFLAGS+=-j$(NUM_JOBS)
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
 TARGET_GCC_BUILDDIR=$(abs_builddir)/$(GCC_VERSION)
@@ -488,7 +489,7 @@ stmp-config-target-gcc: config.status stmp-install-host-ppl stmp-install-host-is
 	   $(GCC_CONFIG_ARGS)) && \
 	$(STAMP) $@
 build-target-gcc: stmp-build-target-gcc
-stmp-build-target-gcc: stmp-config-target-gcc
+stmp-build-target-gcc: stmp-config-target-gcc install-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${GCC_VERSION} \
 		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
@@ -806,7 +807,7 @@ build-target-gdb: stmp-build-target-gdb
 stmp-build-target-gdb: stmp-config-target-gdb
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION}) && $(STAMP) $@
-install-target-gdb: stmp-build-target-gdb
+install-target-gdb: stmp-build-target-gdb install-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION} install)
 endif
