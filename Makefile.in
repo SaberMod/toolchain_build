@@ -236,10 +236,10 @@ all: build
 ifeq ($(ENABLE_GRAPHITE),yes)
 build: install-host-cloog
 endif
-build: build-target-binutils build-host-libbfd build-target-gcc \
+build: build-target-binutils build-target-gcc \
 	build-target-gdb
 
-install: install-target-binutils install-host-libbfd install-target-gcc \
+install: install-target-binutils install-target-gcc \
 	install-target-gdb
 
 # To support canadian cross build we need to build build->target toolchain
@@ -312,7 +312,8 @@ ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS+= \
 	'--with-host-libstdcxx=-static-libgcc \
 	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
-	 --with-gold-ldflags='-static-libgcc -static-libstdc++'
+	 --with-gold-ldflags='-static-libgcc -static-libstdc++' \
+         --enable-install-libbfd
 else
 # In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
 # "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
@@ -387,41 +388,6 @@ install-target-gold: stmp-build-target-gold install-target-binutils
      make -C $(GOLD_VERSION)/gold install)
 
 endif
-
-# build libbfd for host.  We configure with all targets, so this is built
-# separately from the same source.
-# Required by Android build, we always build 32bit host libraries, and
-# put the 32bit host libraries into /lib32.
-.PHONY: config-host-libbfd build-host-libbfd install-host-libbfd
-config-host-libbfd: stmp-config-host-libbfd
-LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
-	--target=${target_alias} --host=${host} --build=${build} \
-	$(host_baseargs) --disable-shared \
-	--enable-install-libbfd --with-included-gettext
-stmp-config-host-libbfd: config.status
-	([ -d libbfd-${BINUTILS_VERSION} ] || \
-	  mkdir libbfd-${BINUTILS_VERSION}) && \
-	(cd libbfd-${BINUTILS_VERSION} ; \
-	 export CFLAGS="$(CFLAGS) -m32" ; \
-	 $(call find-package-srcdir, ${BINUTILS_VERSION})/configure \
-	  $(LIBBFD_CONFIG_ARGS)) && \
-	$(STAMP) $@
-build-host-libbfd: stmp-build-host-libbfd
-stmp-build-host-libbfd: stmp-config-host-libbfd
-	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd all-libiberty && \
-	$(MAKE) -C libbfd-${BINUTILS_VERSION}/intl libintl.a && \
-	$(STAMP) $@
-# Also include libintl.a.  We have to do this manully since the
-# source of libintl in binutils is modified to not install the library.
-# We build with -m32 always, and install host libs into /lib32.
-LIB32DIR=$(libdir)32
-install-host-libbfd: stmp-build-host-libbfd install-target-binutils
-	$(MAKE) -C libbfd-${BINUTILS_VERSION}/bfd install \
-		bfdlibdir=$(LIB32DIR) bfdincludedir=$(includedir) && \
-	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/intl/libintl.a \
-		$(LIB32DIR) && \
-	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/libiberty/libiberty.a \
-		$(LIB32DIR)
 
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
