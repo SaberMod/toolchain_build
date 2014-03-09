@@ -482,11 +482,11 @@ GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
 
 ifeq ($(target_cpu),i686)
-GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=atom --with-fpmath=sse
+GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=intel --with-fpmath=sse
 endif
 
 ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=x86-64 --with-tune=atom --with-fpmath=sse \
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-tune=intel --with-fpmath=sse \
                    --with-multilib-list=m32,m64,mx32
 endif
 
