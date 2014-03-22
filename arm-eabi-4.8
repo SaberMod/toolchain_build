@@ -1,22 +1,28 @@
 #!/bin/bash
 
+# Set number of cores here
+J=-j16
+
+PREFIX_PATH=~/tmp
+PREFIX=--prefix=$PREFIX_PATH/arm-eabi-4.8
+
 #Make a clean build
 if [ -e Makefile ];
 then
-    make -j10 distclean
+    make $J distclean
 fi;
 
 #Make a clean install always
-if [ -d /tmp/arm-eabi ]
+if [ -d "$PREFIX_PATH" ]
 then
-    rm -rf /tmp/arm-eabi
+    rm -rf $PREFIX_PATH
 fi;
 
 #Build Configuration
-./configure --prefix=/tmp/arm-eabi --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=5.1.3 --with-mpfr-version=3.1.2 --with-mpc-version=1.0.2 --with-gdb-version=gnu --with-sysroot=/ --enable-threads=single
+./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --enable-threads=single
 
 #Build the toolchain
-make -j10;
+make $J;
 
 #Install the toolchain
 make install;
