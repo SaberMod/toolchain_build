@@ -1,28 +1,38 @@
 #!/bin/bash
 
-# Set number of cores here
-J=-j16
+# Add time just for fun
+TIME=time;
 
-PREFIX_PATH=~/tmp/arm-linux-androideabi-4.8
-PREFIX=--prefix=$PREFIX_PATH
+# Set number of cores here
+J=-j16;
+
+PREFIX_PATH=~/tmp/arm-linux-androideabi-4.8;
+PREFIX=--prefix=$PREFIX_PATH;
+
+# Logging?
+#LOG=$PREFIX_PATH > toolchain-log.txt
 
 #Make a clean build
 if [ -e Makefile ];
 then
-    make $J distclean
+    $TIME make $J distclean;
 fi;
 
 #Make a clean install always
-if [ -d $PREFIX_PATH ]
+if [ -d $PREFIX_PATH ];
 then
-    rm -rf $PREFIX_PATH
+    rm -rf $PREFIX_PATH;
 fi;
+
+# Logging?
+#LOG=$PREFIX_PATH > toolchain-log.txt;
+#mkdir $PREFIX_PATH;
 
 #Build Configuration
 ./configure $PREFIX --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --enable-plugins --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --with-sysroot=/ --enable-threads=posix --disable-libquadmath --disable-libatomic --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gold-version=gnu --enable-gold=yes --enable-gold-default=default
 
 #Build the toolchain
-make $J;
+$TIME make $J $LOG;
 
 #Install the toolchain
-make install;
+$TIME make install;
