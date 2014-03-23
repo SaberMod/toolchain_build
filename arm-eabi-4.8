@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Add time just for fun
-TIME=time;
+export TIME=time;
 
 # Set number of cores here
-J=-j16;
+export J=-j16;
 
-PREFIX_PATH=~/tmp/arm-eabi-4.8;
-PREFIX=--prefix=$PREFIX_PATH;
+export PREFIX_PATH=~/tmp/arm-eabi-4.8;
+export PREFIX=--prefix=$PREFIX_PATH;
 
 #Make a clean build
 if [ -e Makefile ];
@@ -26,10 +26,10 @@ fi;
 #mkdir $PREFIX_PATH;
 
 #Build Configuration
-./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --enable-threads=single
+./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/
 
 #Build the toolchain
-$TIME make $J $LOG;
+$TIME make $J;
 
 #Install the toolchain
 $TIME make install;
