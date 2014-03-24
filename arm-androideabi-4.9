@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Make sure gcc is on the right remote branch 4.8.3
+cd ../gcc/gcc-SaberMod && git fetch sm 4.9.0 && git checkout FETCH_HEAD && cd ../../build;
+
 # Add time just for fun
 export TIME=time;
 
@@ -8,6 +11,12 @@ export J=-j16;
 
 export PREFIX_PATH=~/tmp/arm-linux-androideabi-4.9;
 export PREFIX=--prefix=$PREFIX_PATH;
+
+#Make a clean build
+if [ -e Makefile ];
+then
+    $TIME make $J distclean;
+fi;
 
 #Make a clean install always
 if [ -d $PREFIX_PATH ];

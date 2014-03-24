@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Make sure gcc is on the right remote branch 4.8.3
+cd ../gcc/gcc-SaberMod && git fetch sm 4.9.0 && git checkout FETCH_HEAD && cd ../../build;
+
 # Add time just for fun
 export TIME=time;
 
