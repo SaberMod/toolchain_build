@@ -162,7 +162,7 @@ export	CC_FOR_TARGET="$(TARGET_GCC_BUILDDIR)/gcc/xgcc \
 #export CFLAGS_FOR_TARGET=-fexceptions
 #export CXXFLAGS_FOR_TARGET=-frtti
 #
-CFLAGS_FOR_TARGET+= -O2 -O3 -Os -g
+CFLAGS_FOR_TARGET+= -O3 -O2 -Os -gdwarf-2 -g -std=gnu11 -std=gnu99 -fgcse-las -fstrict-aliasing -Wstrict-aliasing=3 -Werror=strict-aliasing
 CXXFLAGS_FOR_TARGET+=$(CFLAGS_FOR_TARGET)
 LDFLAGS_FOR_TARGET=
 
@@ -457,7 +457,7 @@ endif
 
 # ARM specific options.
 ifeq ($(target_cpu),arm)
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv5te \
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a \
 	--enable-target-optspace
 
 ifneq ($(target_os),linux-androideabi)
