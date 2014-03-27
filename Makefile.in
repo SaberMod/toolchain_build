@@ -95,6 +95,7 @@ HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
+MAKEFLAGS+=-j$(NUM_JOBS)
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
 TARGET_GCC_BUILDDIR=$(abs_builddir)/$(GCC_VERSION)
@@ -500,7 +501,7 @@ stmp-build-target-gcc: stmp-config-target-gcc
 install-target-gcc-gcc: stmp-build-target-gcc
 	($(canadian_env) \
 	 $(MAKE) -C ${GCC_VERSION} $(gcc_install_target))
-install-target-gcc: install-target-gcc-gcc $(install-target-gcc-multilibs)
+install-target-gcc: install-target-gcc-gcc $(install-target-gcc-multilibs) install-target-binutils
 
 # minimal gcc rules
 # minimal gcc only builds the C and C++ compilers and libgcc
@@ -807,7 +808,7 @@ build-target-gdb: stmp-build-target-gdb
 stmp-build-target-gdb: stmp-config-target-gdb
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION}) && $(STAMP) $@
-install-target-gdb: stmp-build-target-gdb
+install-target-gdb: stmp-build-target-gdb install-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION} install)
 endif
