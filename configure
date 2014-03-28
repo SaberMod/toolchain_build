@@ -2218,23 +2218,12 @@ do
   esac
 done
 
-
-
-ENABLE_GRAPHITE=no
 # Check whether --enable-graphite was given.
 if test "${enable_graphite+set}" = set; then :
-  enableval=$enable_graphite;
+  withval=$enable_graphite; if test x"$withval" != x ; then
+     ENABLE_GRAPHITE="$withval"
+   fi
 fi
-
-graphite=yes
-if test x${enableval} != xyes; then
-  graphite=no
-fi
-if test "$GCC_MIN_VERSION_4_5_0" == "no"; then
-  graphite=no
-fi
-ENABLE_GRAPHITE=$graphite
-
 
 # package to source path
 case $srcdir in
@@ -2619,49 +2608,6 @@ if test \( ! -d $srcdir/../$tool/mpc-${MPC_VERSION} \) -a \( x"$version" != x"no
 fi
 fi
 
-
-if test "$ENABLE_GRAPHITE" == "yes"; then
-# ppl version (default is 0.11.2)
-# ppl is only used for gcc 4.5 and 4.6 with graphite optimization.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ppl version" >&5
-$as_echo_n "checking ppl version... " >&6; }
-
-# Check whether --with-ppl-version was given.
-if test "${with_ppl_version+set}" = set; then :
-  withval=$with_ppl_version; if test x"$withval" != x ; then
-     PPL_VERSION="$withval"
-   fi
-else
-  PPL_VERSION="0.11.2"
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PPL_VERSION" >&5
-$as_echo "$PPL_VERSION" >&6; }
-x=ppl-${PPL_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
-if test \( ! -d $srcdir/../$tool/ppl-${PPL_VERSION} \) -a \( x"$version" != x"none"  \) ; then
-  if test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/ppl-${PPL_VERSION}.tar
-  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/ppl-${PPL_VERSION}.tar.gz
-  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/ppl-${PPL_VERSION}.tgz
-  elif test -f $srcdir/../$tool/ppl-${PPL_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/ppl-${PPL_VERSION}.tar.bz2
-  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar
-  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.gz
-  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/ppl-${PPL_VERSION}.tgz
-  elif test -f $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/ppl-${PPL_VERSION}.tar.bz2
-  else
-    as_fn_error "'package ppl-${PPL_VERSION} does not exist.'" "$LINENO" 5
-  fi
-fi
-fi
-
-
 if test "$ENABLE_GRAPHITE" == "yes"; then
 # cloog-ppl or cloog version (default is 0.15.9)
 # cloog is only used for gcc 4.5+ with graphite optimization.
@@ -2677,20 +2623,9 @@ else
   CLOOG_VERSION="0.15.9"
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $CLOOG_VERSION" >&5
-$as_echo "$CLOOG_VERSION" >&6; }
-case $CLOOG_VERSION in
-  0.15*)
-    # CLooG/PPL relies on the PPL for version 0.15.x
-    CLOOG_VERSION="ppl-$CLOOG_VERSION"
-    ;;
-  0.16*|0.17*|0.18*)
-    # CLooG 0.16+ has its own embedded polyhedral library
-    CLOOG_BACKEND="--enable-cloog-backend=isl"
-    ;;
-  *)
-    as_fn_error "Unsupported cloog version" "$LINENO" 5;
-esac
+# CLooG 0.16+ has its own embedded polyhedral library
+CLOOG_BACKEND="--enable-cloog-backend=isl"
+
 x=cloog-${CLOOG_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
 if test \( ! -d $srcdir/../$tool/cloog-${CLOOG_VERSION} \) -a \( x"$version" != x"none"  \) ; then
   if test -f $srcdir/../$tool/cloog-${CLOOG_VERSION}.tar ; then

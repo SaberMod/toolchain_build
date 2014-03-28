@@ -1,34 +1,30 @@
 #!/bin/bash
 
-# Make sure gcc is on the right remote branch 4.8.3
+# Make sure gcc is on the right remote branch 4.9.0
 cd ../gcc/gcc-SaberMod && git fetch sm 4.9.0 && git checkout FETCH_HEAD && cd ../../build;
-
-# Add time just for fun
-export TIME=time;
 
 # Set number of cores here
 export J=-j16;
 
-export PREFIX_PATH=~/tmp/arm-eabi-4.9;
-export PREFIX=--prefix=$PREFIX_PATH;
-
 #Make a clean build
 if [ -e Makefile ];
 then
-    $TIME make $J distclean;
+    make $J distclean;
 fi;
 
-#Make a clean install always
-if [ -d "$PREFIX_PATH" ];
+export PREFIX_PATH=~/tmp/arm-eabi-4.9;
+export PREFIX=--prefix=$PREFIX_PATH;
+
+if [ -e $PREFIX_PATH ];
 then
     rm -rf $PREFIX_PATH;
 fi;
 
 #Build Configuration
-./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/
+./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --enable-version-specific-runtime-libs
 
 #Build the toolchain
-$TIME make $J;
+make $J
 
 #Install the toolchain
-$TIME make install;
+make install;

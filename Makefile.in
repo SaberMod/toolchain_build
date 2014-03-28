@@ -306,7 +306,7 @@ BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
 	$(baseargs) --disable-shared --disable-nls --disable-werror
 ifeq ($(ENABLE_GRAPHITE),yes)
-BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
+BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 # links to the static C++ runtime to avoid depending on the host version
 ifneq ($(host_os),darwin)
@@ -337,7 +337,7 @@ BINUTILS_CONFIG_ARGS += --enable-gold=both/ld
 endif
 endif
 endif
-stmp-config-target-binutils: config.status stmp-install-host-ppl stmp-install-host-isl $(canadian_stmp)
+stmp-config-target-binutils: config.status stmp-install-host-isl $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
 	($(canadian_env) \
@@ -477,7 +477,7 @@ GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
-stmp-config-target-gcc: config.status stmp-install-host-ppl stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
+stmp-config-target-gcc: config.status stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
 	([ -d ${GCC_VERSION} ] || \
 	  mkdir ${GCC_VERSION}) && \
 	($(canadian_env) \
@@ -654,15 +654,6 @@ stmp-config-host-ppl: config.status stmp-install-host-gmp
 stmp-build-host-ppl: stmp-config-host-ppl
 	$(MAKE) -C ${PPL_VERSION} && $(STAMP) $@
 build-host-ppl: stmp-build-host-ppl
-
-ifeq ($(ENABLE_GRAPHITE),yes)
-stmp-install-host-ppl: stmp-build-host-ppl
-	$(MAKE) -C ${PPL_VERSION} install && \
-	$(STAMP) $@
-else
-stmp-install-host-ppl:
-	$(STAMP) $@
-endif
 install-host-ppl: stmp-install-host-ppl
 
 # host isl rules
@@ -687,7 +678,7 @@ stmp-build-host-isl: stmp-config-host-isl
 	$(MAKE) -C ${ISL_VERSION} && $(STAMP) $@
 build-host-isl: stmp-build-host-isl
 
-ifeq ($(ENABLE_GRAPHITE)$(GCC_MIN_VERSION_4_8_0),yesyes)
+ifeq ($(ENABLE_GRAPHITE),yes)
 stmp-install-host-isl: stmp-build-host-isl
 	$(MAKE) -C ${ISL_VERSION} install && \
 	$(STAMP) $@
@@ -738,13 +729,7 @@ ifeq ($(ENABLE_GRAPHITE),yes)
 stmp-install-host-cloog: stmp-build-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
-ifeq ($(findstring ppl-,$(CLOOG_VERSION)),)
-	$(MAKE) -C ${CLOOG_VERSION}/isl install-libLTLIBRARIES \
-		install-pkgincludeHEADERS
-endif
-ifeq ($(GCC_MIN_VERSION_4_8_0),yes)
 	$(MAKE) -C ${CLOOG_VERSION} install
-endif
 	$(STAMP) $@
 else
 stmp-install-host-cloog:
