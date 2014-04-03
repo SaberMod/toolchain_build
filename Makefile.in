@@ -255,7 +255,7 @@ stmp-config-canadian-tools:
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
 	 $(abs_srcdir)/configure $(baseargs) --with-gdb-version=none --build=$(cur_build) \
-		--host=$(cur_build) --target=$(cur_target))  && \
+		--host=$(cur_build) --target=$(cur_target) --prefix=$(CANADIAN_ROOT)/install) && \
 	$(STAMP) $@
 
 build-canadian-tools: stmp-build-canadian-tools
@@ -269,7 +269,7 @@ install-canadian-tools: stmp-install-canadian-tools
 stmp-install-canadian-tools: stmp-build-canadian-tools
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
-	 $(MAKE) -j1 install prefix=$(CANADIAN_ROOT)/install) && \
+	 $(MAKE) -j1 install) && \
 	$(STAMP) $@
 
 # When building canadian cross toolchain we cannot build GCC target libraries.
@@ -789,10 +789,10 @@ stmp-config-target-gdb: config.status $(canadian_stmp)
 	  $(GDB_CONFIG_ARGS)) && \
 	$(STAMP) $@
 build-target-gdb: stmp-build-target-gdb
-stmp-build-target-gdb: stmp-config-target-gdb
+stmp-build-target-gdb: stmp-config-target-gdb install-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION}) && $(STAMP) $@
-install-target-gdb: stmp-build-target-gdb install-target-binutils
+install-target-gdb: stmp-build-target-gdb
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION} install)
 endif
