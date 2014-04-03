@@ -22,7 +22,7 @@ then
 fi;
 
 #Build Configuration
-./configure $PREFIX --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/ --with-gold-version=gnu --enable-gold=default --enable-plugins --enable-version-specific-runtime-libs --enable-libsanitizer=no --enable-libquadmath=no --enable-libatomic=no
+./configure $PREFIX --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-(4.9.0_android+graphite)" --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/ --with-gold-version=gnu --enable-gold=default --enable-plugins --enable-version-specific-runtime-libs --enable-libsanitizer=no --enable-libquadmath=no --enable-libatomic=no
 
 #Build the toolchain
 make $J;
