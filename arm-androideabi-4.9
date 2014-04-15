@@ -1,32 +1,59 @@
 #!/bin/bash
 
+###########################################################################
+###########################################################################
+#####
+#####  C O N F I G U R A T I O N
+#####
+###########################################################################
+###########################################################################
+
+panic ()
+{
+    echo "ERROR: $@"
+    exit 1
+}
+
 # Make sure gcc is on the right remote branch 4.9.0
 cd ../gcc/gcc-SaberMod && git fetch sm 4.9.0 && git checkout FETCH_HEAD && cd ../../build;
 
-# Set number of cores here
-export J=-j8;
+# Try to parallelize the build for faster performance.
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
-#Make a clean build
+# Determine Make flags
+MAKE_FLAGS=-j"$JOBS"
+
+# Make a clean build
 if [ -e Makefile ];
 then
-    make $J distclean;
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
 fi;
 
 export PREFIX_PATH=~/tmp/arm-linux-androideabi-4.9;
 export PREFIX=--prefix=$PREFIX_PATH;
 
-#Make a clean install always
-if [ -d $PREFIX_PATH ];
+if [ -d "$PREFIX_PATH" ];
 then
     rm -rf $PREFIX_PATH;
 fi;
 
 #Build Configuration
-./configure $PREFIX --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.9.0_android+graphite" --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/ --with-gold-version=gnu --enable-gold=default --enable-plugins --enable-version-specific-runtime-libs --enable-libsanitizer=no --enable-libquadmath=no --enable-libatomic=no
+./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.9.0_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
 
 #Build the toolchain
-make $J;
+make $MAKE_FLAGS;
 
 #Install the toolchain
 make install;
+
+GCC_INSTALLED=$PREFIX_PATH/bin/arm-linux-androideabi-gcc
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    echo "";
+else
+    ./build-failed;
+fi;
 

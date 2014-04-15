@@ -1,5 +1,19 @@
 #!/bin/bash
 
+###########################################################################
+###########################################################################
+#####
+#####  C O N F I G U R A T I O N
+#####
+###########################################################################
+###########################################################################
+
+panic ()
+{
+    echo "ERROR: $@"
+    exit 1
+}
+
 # Make sure gcc is on the right remote branch 4.8.3
 cd ../gcc/gcc-SaberMod && git fetch sm 4.8.3 && git checkout FETCH_HEAD && cd ../../build;
 
@@ -29,7 +43,7 @@ fi;
 #mkdir $PREFIX_PATH;
 
 #Build Configuration
-./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.3_arm+graphite" --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --enable-version-specific-runtime-libs
+./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.3_arm-graphite" --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/
 
 #Build the toolchain
 $TIME make $J;

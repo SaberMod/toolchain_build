@@ -160,12 +160,12 @@ export	CC_FOR_TARGET="$(TARGET_GCC_BUILDDIR)/gcc/xgcc \
 # 
 # To build libstdc++ with RTTI and exceptions do:
 #
-#export CFLAGS_FOR_TARGET=-fexceptions
-#export CXXFLAGS_FOR_TARGET=-frtti
+#export CFLAGS_FOR_TARGET= -fexceptions
+#export CXXFLAGS_FOR_TARGET= -frtti
 #
-CFLAGS_FOR_TARGET+= -O3 -O2 -Os -gdwarf-2 -g -std=gnu11 -std=gnu99 -fgcse-las -fstrict-aliasing -Wstrict-aliasing=3 -Werror=strict-aliasing
-CXXFLAGS_FOR_TARGET+=$(CFLAGS_FOR_TARGET)
-LDFLAGS_FOR_TARGET=
+CFLAGS_FOR_TARGET += -O2 -Os -g
+CXXFLAGS_FOR_TARGET += $(CFLAGS_FOR_TARGET)
+LDFLAGS_FOR_TARGET =
 
 # Helper
 prefix-list = $(foreach e, $(2), $(join $1, $e))
@@ -309,34 +309,15 @@ ifeq ($(ENABLE_GRAPHITE),yes)
 BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 # links to the static C++ runtime to avoid depending on the host version
-ifneq ($(host_os),darwin)
-BINUTILS_CONFIG_ARGS+= \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
-	 --with-gold-ldflags='-static-libgcc -static-libstdc++' \
-         --enable-install-libbfd
-else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-GCC_CONFIG_ARGS += '--with-host-libstdcxx=-static-libgcc -lstdc++ -lm'
-endif
 endif
 # Enable dual linker support and make gold as default linker when gold is
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
 ifneq ($(ENABLE_GOLD),)
-ifeq ($(BINUTILS_MIN_VERSION_2_21),yes)
 ifeq ($(ENABLE_LD_DEFAULT),)
 BINUTILS_CONFIG_ARGS += --enable-gold=default
 endif
-else
-ifeq ($(ENABLE_LD_DEFAULT),)
-BINUTILS_CONFIG_ARGS += --enable-gold=both/gold
-else
-BINUTILS_CONFIG_ARGS += --enable-gold=both/ld
 endif
-endif
-endif
+
 stmp-config-target-binutils: config.status stmp-install-host-isl $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
@@ -353,7 +334,7 @@ install-target-binutils: stmp-build-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${BINUTILS_VERSION} install)
 
-# target gold rules.  We need these only if BINUTILS_VERSION != GOLD_VERSION
+# target gold rules.  We need these only if BINUTILS_VERSION is not the same GOLD_VERSION
 ifneq ($(BINUTILS_VERSION), $(GOLD_VERSION))
 .PHONY: config-target-gold build-target-gold install-target-gold
 config-target-gold: stmp-config-target-gold
@@ -361,11 +342,7 @@ config-target-gold: stmp-config-target-gold
 GOLD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
 	$(baseargs) --disable-shared
-ifeq ($(GOLD_MIN_VERSION_2_21),yes)
 	GOLD_CONFIG_ARGS += --enable-gold=default
-else
-	GOLD_CONFIG_ARGS += --enable-gold=both/gold
-endif
 stmp-config-target-gold: config.status
 	([ -d ${GOLD_VERSION} ] || \
 	  mkdir ${GOLD_VERSION}) && \
@@ -401,16 +378,12 @@ GCC_CONFIG_ARGS=--prefix=$(prefix) \
 
 # For gcc versions 4.3.0 and later, gmp and mpfr are required.
 # Also build libgcc is a seperate sub-target in 4.3.0+.
-ifeq ($(GCC_MIN_VERSION_4_3_0),yes)
 stmp-config-target-gcc: stmp-install-host-gmp stmp-install-host-mpfr
 GCC_CONFIG_ARGS += --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
-endif
 
 # For gcc versions 4.5.0 and higher, mpc is required.
-ifeq ($(GCC_MIN_VERSION_4_5_0),yes)
 stmp-config-target-gcc: stmp-install-host-mpc
 GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
-endif
 
 # For gcc 4.5 and 4.6 with graphite optimization, cloog and ppl are required.
 # For gcc 4.8+ with graphite optimization, cloog and isl are required.
@@ -418,53 +391,44 @@ ifeq ($(ENABLE_GRAPHITE),yes)
 GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-ppl=${PPL_DIR} \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 # links to the static C++ runtime to avoid depending on the host version
-ifneq ($(host_os),darwin)
-GCC_CONFIG_ARGS += \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
-else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-GCC_CONFIG_ARGS += '--with-host-libstdcxx=-static-libgcc -lstdc++ -lm'
-endif
 else
 # Disable ppl, isl and cloog just in case the host have them install.
 GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
 
-# Add Android specific gcc options.
-# FIXME: These should be overridable by configure options.
-
-
-# Target indenpendent Android gcc options.
-ifeq ($(BUILD_ANDROID_GCC),yes)
-GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
-	--enable-threads --disable-nls --disable-libmudflap --disable-libgomp \
-	--disable-libstdc__-v3 --disable-sjlj-exceptions --disable-shared \
-	--disable-tls --disable-libitm
-
-CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
-
-ifeq ($(target_cpu),i686)
-GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=intel --with-fpmath=sse
+ifneq ($(host_os),darwin)
+BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm'\
+	--with-gold-ldflags='-static-libgcc -static-libstdc++ -lstdc++ -lm'
+else
+# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
+# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
+# minimal sdk version toolchain will run
+BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -lm' \
+	--with-gold-ldflags='-static-libgcc -static-libstdc++ -lstdc++ -lm'
 endif
 
-ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=x86-64 --with-tune=intel --with-fpmath=sse \
-                   --with-multilib-list=m32,m64,mx32
-endif
+# General GCC configs for all targets
+GCC_CONFIG_ARGS += --enable-libbfd $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libatomic --disable-libquadmath --disable-libsanitizer \
+	--disable-libgomp --enable-threads --disable-libssp --disable-shared --disable-nls --disable-libmudflap \
+	--disable-sjlj-exceptions --disable-tls --disable-libitm --disable-libstdc__-v3 --enable-target-optspace --enable-plugins
+
+CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
 # ARM specific options.
 ifeq ($(target_cpu),arm)
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a \
-	--enable-target-optspace
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a
 
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
 endif
 
+ifeq ($(target_cpu),i686)
+GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse
+endif
+
+ifeq ($(target_cpu),x86_64)
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m32,m64,mx32
 endif
 
 # We add the baseargs and the end so that they override any default args
@@ -506,11 +470,7 @@ install-target-gcc: install-target-gcc-gcc $(install-target-gcc-multilibs) insta
 # minimal gcc only builds the C and C++ compilers and libgcc
 # We use the full gcc configure rules.
 .PHONY: build-target-minimal-gcc install-target-minimal-gcc
-ifeq ("$(GCC_MIN_VERSION_4_3_0)","yes")
-MINIMAL_GCC_BUILD_TARGETS:= gcc target-libgcc 
-else
-MINIMAL_GCC_BUILD_TARGETS:= gcc
-endif
+MINIMAL_GCC_BUILD_TARGETS:= gcc target-libgcc
 
 build-target-minimal-gcc: stmp-build-target-minimal-gcc
 stmp-build-target-minimal-gcc: stmp-config-target-gcc
@@ -775,10 +735,8 @@ GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	$(WITH_PYTHON) --disable-nls --disable-shared
 
 # For gdb versions 7.2 and higher, expat is required.
-ifeq ($(GDB_MIN_VERSION_7_2),yes)
 stmp-config-target-gdb: stmp-install-host-expat
 GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
-endif
 
 stmp-config-target-gdb: config.status $(canadian_stmp)
 	([ -d ${GDB_VERSION} ] || \

@@ -2021,7 +2021,10 @@ case $target in
     BUILD_ANDROID_GCC=yes
     GDB_TARGET=aarch64-elf-linux
     ;;
-  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu | i[3456]86-*-linux-android | x86_64-*-linux-android)
+  i[3456]86-*-linux-gnu | x86_64-*-linux-gnu)
+    BUILD_ANDROID_GCC=no
+    ;;
+  i[3456]86-*-linux-android | x86_64-*-linux-android)
     BUILD_ANDROID_GCC=yes
     ;;
   mips*-*-linux*)

@@ -1,0 +1,109 @@
+#!/bin/bash
+
+###########################################################################
+###########################################################################
+#####
+#####  C O N F I G U R A T I O N
+#####
+###########################################################################
+###########################################################################
+
+panic ()
+{
+    echo "ERROR: $@"
+    exit 1
+}
+
+# ***WARNING***  This script will build two different targets for linux!  This will take a extremly long time depending on your system
+# Could take up to two hours or more on a 8 core processor with 16GB of RAM
+
+# Try to parallelize the build for faster performance.
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+
+# Determine Make flags
+MAKE_FLAGS=-j"$JOBS"
+
+# ***Stage one build x86_64-linux***
+
+# Force cleaning each time
+if [ -e Makefile ];
+then
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+export PREFIX_PATH=~/tmp/x86_64-linux-4.8;
+export PREFIX=--prefix=$PREFIX_PATH;
+
+if [ -d "$PREFIX_PATH" ];
+then
+    rm -rf $PREFIX_PATH;
+    mkdir -p $PREFIX_PATH;
+else
+    mkdir -p $PREFIX_PATH
+fi;
+
+./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+
+# Build the toolchain
+make $MAKE_FLAGS;
+
+# Install the toolchain
+make install;
+
+GCC_INSTALLED=$PREFIX_PATH/bin/x86_64-linux-gcc
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    echo "";
+else
+    panic "**************ERROR*****************
+       **************ERROR*****************
+       **************ERROR*****************
+                                           
+                 Sorry your build failed
+                                           
+       **************ERROR*****************
+       **************ERROR*****************
+       **************ERROR*****************";
+fi;
+
+# ***Stage two build i686-linux***
+# Force building with host flags set to 32bit
+
+# Force cleaning each time
+if [ -e Makefile ];
+then
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+export PREFIX_PATH=~/tmp/i686-linux-4.8;
+export PREFIX=--prefix=$PREFIX_PATH;
+
+if [ -d "$PREFIX_PATH" ];
+then
+    rm -rf $PREFIX_PATH;
+    mkdir -p $PREFIX_PATH;
+else
+    mkdir -p $PREFIX_PATH
+fi;
+
+./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+# Build the toolchain
+make $MAKE_FLAGS;
+
+# Install the toolchain
+make install;
+
+GCC_INSTALLED=$PREFIX_PATH/bin/i686-linux-gcc
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    echo "";
+else
+    ./build-failed;
+fi;
+
