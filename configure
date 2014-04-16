@@ -2301,7 +2301,14 @@ fi
 binutils_version_file="${srcdir}/../binutils/binutils-${BINUTILS_VERSION}/bfd/configure.in"
 if test -f "${binutils_version_file}"; then
   binutils_version_num=`grep AM_INIT_AUTOMAKE ${binutils_version_file} | \
-                        sed -n "s/AM_INIT_AUTOMAKE[^,]*,*\([^)]*\))/\1/p"`
+                        sed -n "s/AM_INIT_AUTOMAKE[^,]*,*\([^)]*\))/\1/p" | \
+                        tr -d "[ ]"`
+  # Starting from binutils-2.24 AC_INIT contain version info
+  if test -z "${binutils_version_num}"; then
+      binutils_version_num=`grep AC_INIT ${binutils_version_file} | \
+                        sed -n "s/AC_INIT[^,]*,*\([^)]*\))/\1/p" | \
+                        tr -d "[ ]"`
+  fi
   BINUTILS_MAJOR=`echo $binutils_version_num | sed -e "s/[^0-9].*//"`
   BINUTILS_MINOR=`echo $binutils_version_num | \
                   sed  -e "s/^[0-9]*\.//" -e "s/[^0-9].*//"`
