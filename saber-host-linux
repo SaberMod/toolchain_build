@@ -14,6 +14,13 @@ panic ()
     exit 1
 }
 
+# Do not use default compiler x86_64-linux-gnu
+# This can cause a lot of problems when attempting to compile a target gcc where the version is much higher than the linux system compiler.
+export CC=gcc-4.9;
+export CXX=g++-4.9;
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
 # ***WARNING***  This script will build two different targets for linux!  This will take a extremly long time depending on your system
 # Could take up to two hours or more on a 8 core processor with 16GB of RAM
 
@@ -32,7 +39,18 @@ then
     make $MAKE_FLAGS distclean;
 fi;
 
-export PREFIX_PATH=~/tmp/x86_64-linux-4.8;
+# Expat and gmp don't always go away
+if [ -e expat-2.0.1 ];
+then
+    rm -rf expat-2.0.1;
+fi;
+
+if [ -e gmp-gnu ];
+then
+    rm -rf gmp-gnu;
+fi;
+
+export PREFIX_PATH=~/tmp/x86_64-linux-4.10;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -43,13 +61,13 @@ else
     mkdir -p $PREFIX_PATH
 fi;
 
-./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --with-sysroot=/ --target=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --enable-shared --enable-plugins --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-languages=c,c++,java
 
 # Build the toolchain
 make $MAKE_FLAGS;
 
-# Install the toolchain
-make install;
+#Install the toolchain (twice)
+make install && make install;
 
 GCC_INSTALLED=$PREFIX_PATH/bin/x86_64-linux-gcc
 
@@ -58,19 +76,34 @@ if [ -e $GCC_INSTALLED ];
 then
     echo "";
 else
-    panic "**************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************
-                                           
-                 Sorry your build failed
-                                           
-       **************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************";
+    ./build-failed;
 fi;
 
 # ***Stage two build i686-linux***
-# Force building with host flags set to 32bit
+
+#!/bin/bash
+
+panic ()
+{
+    echo "ERROR: $@"
+    exit 1
+}
+
+# Do not use default compiler x86_64-linux-gnu
+# This can cause a lot of problems when attempting to compile a target gcc where the version is much higher than the linux system compiler.
+export CC=gcc-4.9;
+export CXX=g++-4.9;
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# ***WARNING***  This script will build two different targets for linux!  This will take a extremly long time depending on your system
+# Could take up to two hours or more on a 8 core processor with 16GB of RAM
+
+# Try to parallelize the build for faster performance.
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+
+# Determine Make flags
+MAKE_FLAGS=-j"$JOBS"
 
 # Force cleaning each time
 if [ -e Makefile ];
@@ -79,7 +112,18 @@ then
     make $MAKE_FLAGS distclean;
 fi;
 
-export PREFIX_PATH=~/tmp/i686-linux-4.8;
+# Expat and gmp don't always go away
+if [ -e expat-2.0.1 ];
+then
+    rm -rf expat-2.0.1;
+fi;
+
+if [ -e gmp-gnu ];
+then
+    rm -rf gmp-gnu;
+fi;
+
+export PREFIX_PATH=~/tmp/i686-linux-4.10;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -90,12 +134,13 @@ else
     mkdir -p $PREFIX_PATH
 fi;
 
-./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --with-sysroot=/ --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --enable-shared --enable-plugins --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-languages=c,c++,java
+
 # Build the toolchain
 make $MAKE_FLAGS;
 
-# Install the toolchain
-make install;
+#Install the toolchain (twice)
+make install && make install;
 
 GCC_INSTALLED=$PREFIX_PATH/bin/i686-linux-gcc
 
