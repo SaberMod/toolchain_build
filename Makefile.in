@@ -396,9 +396,6 @@ else
 GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
 
-BINUTILS_CONFIG_ARGS += --enable-install-libbfd
-GCC_CONFIG_ARGS += --enable-libbfd
-
 # General GCC configs for all targets
 GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libatomic --disable-libquadmath --disable-libsanitizer \
 	--disable-libgomp --enable-threads --enable-addons --enable-version-specific-runtime-libs \
