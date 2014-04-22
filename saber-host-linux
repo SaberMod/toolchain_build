@@ -55,7 +55,7 @@ else
 fi;
 
 # Enable dual linker but not gold or static for x86_64
-./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-32-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-32-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-32-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-32-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
 
 # Build the toolchain
 make $MAKE_FLAGS;
@@ -108,7 +108,7 @@ else
 fi;
 
 # Enable the dual linker and make gold default for i686
-./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold --enable-ld=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
 
 # Build the toolchain
 make $MAKE_FLAGS;
