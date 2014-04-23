@@ -32,6 +32,17 @@ then
     $TIME make $J distclean;
 fi;
 
+# Expat and gmp don't always go away
+if [ -e expat-2.0.1 ];
+then
+    rm -rf expat-2.0.1;
+fi;
+
+if [ -e gmp-gnu ];
+then
+    rm -rf gmp-gnu;
+fi;
+
 #Make a clean install always
 if [ -d "$PREFIX_PATH" ];
 then
@@ -43,11 +54,11 @@ fi;
 #mkdir $PREFIX_PATH;
 
 #Build Configuration
-./configure $PREFIX --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.3_arm-graphite" --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/
+./configure $PREFIX --with-local-prefix=/usr --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.3_arm-graphite" --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/
 
 #Build the toolchain
 $TIME make $J;
 
-#Install the toolchain
-$TIME make install;
+#Install the toolchain (twice)
+make install && make install;
 

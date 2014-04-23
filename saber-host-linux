@@ -32,6 +32,17 @@ then
     make $MAKE_FLAGS distclean;
 fi;
 
+# Expat and gmp don't always go away
+if [ -e expat-2.0.1 ];
+then
+    rm -rf expat-2.0.1;
+fi;
+
+if [ -e gmp-gnu ];
+then
+    rm -rf gmp-gnu;
+fi;
+
 export PREFIX_PATH=~/tmp/x86_64-linux-4.8;
 export PREFIX=--prefix=$PREFIX_PATH;
 
@@ -43,13 +54,14 @@ else
     mkdir -p $PREFIX_PATH
 fi;
 
+# Enable dual linker but not gold or static for x86_64
 ./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
 
 # Build the toolchain
 make $MAKE_FLAGS;
 
-# Install the toolchain
-make install;
+#Install the toolchain (twice)
+make install && make install;
 
 GCC_INSTALLED=$PREFIX_PATH/bin/x86_64-linux-gcc
 
@@ -58,25 +70,30 @@ if [ -e $GCC_INSTALLED ];
 then
     echo "";
 else
-    panic "**************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************
-                                           
-                 Sorry your build failed
-                                           
-       **************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************";
+    ./build-failed;
 fi;
 
 # ***Stage two build i686-linux***
 # Force building with host flags set to 32bit
+
+#!/bin/bash
 
 # Force cleaning each time
 if [ -e Makefile ];
 then
     make $MAKE_FLAGS clean;
     make $MAKE_FLAGS distclean;
+fi;
+
+# Expat and gmp don't always go away
+if [ -e expat-2.0.1 ];
+then
+    rm -rf expat-2.0.1;
+fi;
+
+if [ -e gmp-gnu ];
+then
+    rm -rf gmp-gnu;
 fi;
 
 export PREFIX_PATH=~/tmp/i686-linux-4.8;
@@ -90,12 +107,14 @@ else
     mkdir -p $PREFIX_PATH
 fi;
 
+# Enable the dual linker and make gold default for i686
 ./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+
 # Build the toolchain
 make $MAKE_FLAGS;
 
-# Install the toolchain
-make install;
+#Install the toolchain (twice)
+make install && make install;
 
 GCC_INSTALLED=$PREFIX_PATH/bin/i686-linux-gcc
 
@@ -106,4 +125,5 @@ then
 else
     ./build-failed;
 fi;
+
 
