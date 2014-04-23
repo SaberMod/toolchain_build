@@ -425,7 +425,6 @@ BINUTILS_CONFIG_ARGS += --with-host-libstdcxx="-static-libgcc -static-libstdc++ 
 endif
 
 BINUTILS_CONFIG_ARGS += --with-boot-ldflags=yes
-GCC_CONFIG_ARGS += --enable-shared
 else
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx="-static-libgcc -Bstatic -lstdc++ -static-libstdc++ -Bdynamic -lm -Wl"
@@ -453,7 +452,7 @@ endif
 endif
 
 ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx="-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm" \
 	--with-boot-ldflags=yes
