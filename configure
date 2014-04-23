@@ -2461,7 +2461,7 @@ else
   GCC_MIN_VERSION_4_5_0="yes"
   GCC_MIN_VERSION_4_8_0="yes"
   GCC_MIN_VERSION_4_9_0="yes"
-  GCC_MIN_VERSION_4_10_0="yes
+  GCC_MIN_VERSION_4_10_0="yes"
 fi
 
 

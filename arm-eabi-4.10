@@ -50,7 +50,7 @@ then
 fi;
 
 #Build Configuration
-./configure $PREFIX --with-local-prefix=/usr --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.10.0_arm-graphite' --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --with-gold-version=gnu --enable-gold=yes --enable-ld=default
+./configure $PREFIX --with-local-prefix=/usr --target=arm-eabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.10.0_arm-graphite' --with-binutils-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-sysroot=/ --with-gold-version=gnu --enable-gold=default
 
 #Build the toolchain
 make $MAKE_FLAGS;
