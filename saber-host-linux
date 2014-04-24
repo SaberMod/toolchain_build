@@ -18,10 +18,10 @@ panic ()
 # Could take up to two hours or more on a 8 core processor with 16GB of RAM
 
 # Try to parallelize the build for faster performance.
-JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+JOBS=$(cat /proc/cpuinfo | grep -c processor);
 
 # Determine Make flags
-MAKE_FLAGS=-j"$JOBS"
+MAKE_FLAGS=-j$JOBS
 
 # ***Stage one build x86_64-linux***
 
@@ -55,7 +55,7 @@ else
 fi;
 
 # Enable dual linker but not gold or static for x86_64
-./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --target=x86_64-linux-gnu --build=x86_64-linux-gnu --host=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/ --enable-multiarch
 
 # Build the toolchain
 make $MAKE_FLAGS;
@@ -108,7 +108,7 @@ else
 fi;
 
 # Enable the dual linker and make gold default for i686
-./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/
+./configure $PREFIX --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=i686-linux-gnu --program-transform-name='s&^&i686-linux-&' -with-gcc-version=SaberMod --with-pkgversion='SaberMod-i686-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-gold-version=gnu --enable-gold=default --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-sysroot=/ --enable-multiarch
 
 # Build the toolchain
 make $MAKE_FLAGS;
