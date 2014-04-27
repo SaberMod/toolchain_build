@@ -424,7 +424,7 @@ else
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -Wl -lm'
 endif
 
-BINUTILS_CONFIG_ARGS += --with-boot-ldflags=yes
+BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
 else
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -lstdc++ -static-libstdc++ -Bdynamic -lm -Wl'
@@ -434,7 +434,7 @@ else
 # minimal sdk version toolchain will run
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -lm -Wl'
 endif
-BINUTILS_CONFIG_ARGS += --with-boot-ldflags=yes
+BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
 endif
 endif
 
@@ -442,7 +442,7 @@ ifeq ($(target_cpu),i686)
 GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm' \
-	--with-boot-ldflags=yes
+	--with-gold-ldflags='-static-libgcc -static-libstdc++'
 else
 # In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
 # "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
@@ -455,7 +455,7 @@ ifeq ($(target_cpu),x86_64)
 GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32
 ifneq ($(host_os),darwin)
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm' \
-	--with-boot-ldflags=yes
+	--with-gold-ldflags='-static-libgcc -static-libstdc++'
 else
 # In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
 # "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
