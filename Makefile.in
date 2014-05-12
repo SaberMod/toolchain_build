@@ -402,7 +402,7 @@ GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) \
 	--disable-libssp --disable-nls --disable-libmudflap --disable-sjlj-exceptions --disable-tls \
 	--disable-libitm --disable-plugin --disable-shared
 
-BINUTILS_CONFIG_ARGS += --enable-libstdc++-v3=no --enable-install-libbfd
+BINUTILS_CONFIG_ARGS += --enable-install-libbfd
 
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
@@ -422,15 +422,15 @@ else
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -Wl -lm'
 endif
 
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --disable-libstdc__-v3
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --disable-libstdc__-v3 --enable-libstdc++-v3=no
 endif
 
 ifeq ($(target_cpu),i686)
-GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse --enable-libstdc++-v3=no
+GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse
 endif
 
 ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32 --enable-libstdc++-v3=no
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32
 endif
 
 # We add the baseargs at the end so that they override any default args
