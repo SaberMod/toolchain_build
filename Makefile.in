@@ -1,3 +1,5 @@
+# Copywrite (C) 2014 The SaberMod project
+
 # -------------------------------
 # Standard Autoconf-set variables
 # -------------------------------
@@ -308,7 +310,6 @@ BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 ifeq ($(ENABLE_GRAPHITE),yes)
 BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
-# links to the static C++ runtime to avoid depending on the host version
 endif
 # Enable dual linker support and make gold as default linker when gold is
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
@@ -390,21 +391,24 @@ GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
 ifeq ($(ENABLE_GRAPHITE),yes)
 GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} \
 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
-# links to the static C++ runtime to avoid depending on the host version
 else
 # Disable ppl, isl and cloog just in case the host have them install.
 GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
 
-# General GCC configs for all targets
-GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) \
-	--disable-libgomp --enable-threads --enable-addons --enable-version-specific-runtime-libs \
-	--disable-libssp --disable-nls --disable-libmudflap --disable-sjlj-exceptions --disable-tls \
-	--disable-libitm --disable-plugin --disable-shared
-
-BINUTILS_CONFIG_ARGS += --enable-install-libbfd
+# General configs for all targets
+GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --disable-libgomp --enable-threads \
+	--disable-libmudflap --disable-libcilkrts $(GCC_CONFIG_LIBSTDCXX_V3) --disable-shared \
+	--disable-libssp --disable-nls --disable-sjlj-exceptions --disable-tls --disable-libitm \
+	--disable-plugin
+BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm' \
+	--with-gold-ldflags='-static-libgcc -static-libstdc++' --enable-install-libbfd
 
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
+
+ifneq ($(target_cpu),arm)
+GCC_CONFIG_ARGS += -enable-libstdcxx
+endif
 
 # ARM specific options.
 ifeq ($(target_cpu),arm)
@@ -412,39 +416,22 @@ ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
 
-ifneq ($(host_os),darwin)
-BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm'
-ifneq ($(ENABLE_GOLD),)
-BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
-endif
-else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -Wl -lm'
-endif
-
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --disable-libstdc__-v3 --enable-libstdc++-v3=no
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon \
+	 --disable-libstdc__-v3
 endif
 
 ifeq ($(target_cpu),i686)
 GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse
-ifneq ($(host_os),darwin)
-BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm' \
-	--with-gold-ldflags='-static-libgcc -static-libstdc++'
-else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -static-libstdc++ -lstdc++ -Wl -lm'
-endif
+BINUTILS_CONFIG_ARGS += --disable-dependency-tracking
 endif
 
 ifeq ($(target_cpu),x86_64)
 GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32
+BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --disable-dependency-tracking
 endif
 
-# We add the baseargs at the end so that they override any default args
+# We add the baseargs at the end so that they override any default args for GCC only..
+# Binutils and other baseargs will not get overrided here
 GCC_CONFIG_ARGS += $(baseargs)
 
 # Add user specified --enable-gold=xxx option to gcc

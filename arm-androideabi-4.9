@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Copyrite (C) 2014 The SaberMod Project
+
 ###########################################################################
 ###########################################################################
 #####
@@ -13,11 +15,6 @@ panic ()
     echo "ERROR: $@"
     exit 1
 }
-
-# Do not use default compiler x86_64-linux-gnu
-# This can cause a lot of problems when attempting to compile a target gcc where the version is much higher than the linux system compiler.
-export CC=gcc-4.8;
-export CXX=g++-4.8;
 
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
@@ -57,7 +54,7 @@ then
 fi;
 
 #Build Configuration
-./configure $PREFIX --with-sysroot=/ --target=arm-linux-androideabi --host=x86_64-linux-gnu --build=x86_64-linux-gnu --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.9.1_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins
+./configure $PREFIX --with-sysroot=/ --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.9.1_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins --enable-threads --disable-option-checking
 
 #Build the toolchain
 make $MAKE_FLAGS;
