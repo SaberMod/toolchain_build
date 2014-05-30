@@ -17,7 +17,7 @@ panic ()
 }
 
 # Make sure gcc is on the right remote branch 4.8.3
-cd ../gcc/gcc-SaberMod && git fetch sm 4.8.3 && git checkout FETCH_HEAD && cd ../../build;
+cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
 
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";
@@ -52,7 +52,7 @@ then
 fi;
 
 #Build Configuration - don't use /usr/local
-./configure $PREFIX --with-sysroot=/ --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.8.3_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins --enable-threads --disable-option-checking
+./configure $PREFIX --with-sysroot=/ --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.8.4_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins --enable-threads --disable-option-checking
 
 #Build the toolchain
 make $MAKE_FLAGS;
