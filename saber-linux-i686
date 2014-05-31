@@ -18,6 +18,9 @@ panic ()
 
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
+# Make sure gcc is on the right remote branch 4.8.4
+cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
+
 # ***WARNING***  This script will build two different targets for linux!  This will take a extremly long time depending on your system
 # Could take up to two hours or more on a 8 core processor with 16GB of RAM
 
@@ -47,7 +50,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export PREFIX_PATH=~/tmp/i686-linux-4.9;
+export PREFIX_PATH=~/tmp/i686-linux-4.8;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
