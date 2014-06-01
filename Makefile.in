@@ -407,7 +407,7 @@ BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstd
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
 ifneq ($(target_cpu),arm)
-GCC_CONFIG_ARGS += -enable-libstdcxx
+GCC_CONFIG_ARGS += --enable-libstdcxx
 endif
 
 # ARM specific options.
