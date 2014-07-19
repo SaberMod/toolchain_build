@@ -17,7 +17,7 @@ panic ()
 }
 
 # Make sure gcc is on the right remote branch 4.8.3
--cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
+cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
 
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";
