@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Build all with gcc 4.10
+bash arm-androideabi-4.10 && bash arm-eabi-4.10;
+echo "done with all gcc 4.10";
+
