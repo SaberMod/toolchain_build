@@ -18,8 +18,8 @@ panic ()
 
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
-# ***WARNING***  This script will build two different targets for linux!  This will take a extremly long time depending on your system
-# Could take up to two hours or more on a 8 core processor with 16GB of RAM
+# Make sure gcc is on the right remote branch 4.8.x
+cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
 
 # Try to parallelize the build for faster performance.
 JOBS=$(cat /proc/cpuinfo | grep -c processor);
@@ -58,7 +58,7 @@ else
     mkdir -p $PREFIX_PATH
 fi;
 
-./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --enable-plugins --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-gold=default --with-gold-version=gnu --enable-threads --disable-option-checking
+./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=x86_64-linux-gnu --program-transform-name='s&^&x86_64-linux-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-x86_64-linux-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.1 --with-isl-version=0.12.1 --enable-graphite=yes --enable-plugins --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-gold=default --with-gold-version=gnu --enable-threads --disable-option-checking
 
 # Build the toolchain
 make $MAKE_FLAGS;

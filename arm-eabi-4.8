@@ -16,7 +16,7 @@ panic ()
     exit 1
 }
 
-# Make sure gcc is on the right remote branch 4.8.3
+# Make sure gcc is on the right remote branch 4.8.x
 cd ../gcc/gcc-SaberMod && git fetch sm 4.8.4 && git checkout FETCH_HEAD && cd ../../build;
 
 # Add time just for fun
@@ -56,7 +56,7 @@ fi;
 #mkdir $PREFIX_PATH;
 
 #Build Configuration
-./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=arm-eabi --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.4_arm-graphite" --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-cloog-version=0.18.0 --with-isl-version=0.11.1 --enable-graphite=yes --enable-plugins --enable-threads --enable-ld=default --disable-option-checking
+./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=arm-eabi --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-pkgversion="SaberMod-4.8.4_arm-graphite" --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=gnu --with-cloog-version=0.18.1 --with-isl-version=0.12.1 --enable-graphite=yes --enable-plugins --enable-threads --enable-ld=default --disable-option-checking
 
 #Build the toolchain
 $TIME make $J;
