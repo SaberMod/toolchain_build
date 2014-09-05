@@ -19,7 +19,7 @@ panic ()
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # Make sure gcc is on the right remote branch 4.10.0
-cd ../gcc/gcc-SaberMod && git fetch sm 4.10.0 && git checkout FETCH_HEAD && cd ../../build;
+cd ../gcc/gcc-SaberMod && git fetch sm 5.0.0 && git checkout FETCH_HEAD && cd ../../build;
 
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";
@@ -45,7 +45,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export PREFIX_PATH=~/tmp/arm-linux-androideabi-4.10;
+export PREFIX_PATH=~/tmp/arm-linux-androideabi-5.0;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -54,7 +54,7 @@ then
 fi;
 
 #Build Configuration
-./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.10.0_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.1 --with-isl-version=0.12.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins --enable-threads --disable-option-checking
+./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=arm-linux-androideabi --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-5.0.0_android-graphite' --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=0.18.1 --with-isl-version=0.12.1 --enable-graphite=yes --with-gold-version=gnu --enable-gold=default --disable-libsanitizer --disable-libquadmath --disable-libatomic --enable-plugins --enable-threads --disable-option-checking
 
 #Build the toolchain
 make $MAKE_FLAGS;
