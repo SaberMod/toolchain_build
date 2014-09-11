@@ -19,12 +19,6 @@ panic ()
 # Make sure gcc is on the right remote branch 4.9.1
 cd ../gcc/gcc-SaberMod && git fetch sm 4.9.2 && git checkout FETCH_HEAD && cd ../../build;
 
-# Try to parallelize the build for faster performance.
-JOBS="$(cat /proc/cpuinfo | grep -c processor)";
-
-# Determine Make flags
-MAKE_FLAGS=-j"$JOBS"
-
 # Make a clean build
 if [ -e Makefile ];
 then

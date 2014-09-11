@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Build all linux targets
-bash saber-linux-i686 && bash saber-linux-x86_64;
-echo "done with all saber-linux targets";
-
