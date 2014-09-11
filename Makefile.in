@@ -97,7 +97,6 @@ HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
-MAKEFLAGS+=-j$(NUM_JOBS)
 
 TARGET_BINUTILS_BUILDDIR=$(abs_builddir)/$(BINUTILS_VERSION)
 TARGET_GCC_BUILDDIR=$(abs_builddir)/$(GCC_VERSION)
