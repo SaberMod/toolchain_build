@@ -1,6 +1,0 @@
-#!/bin/bash
-# All currently supported targets
-# Start with gcc 4.8 then work up to 4.10
-
-bash all-4.8 && bash all-4.9 && bash all-5.0;
-echo "done with all 4.8-4.10 and linux targets";

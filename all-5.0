@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Build all with gcc 5.0
-bash arm-androideabi-5.0 && bash arm-eabi-5.0;
-echo "done with all gcc 5.0";
-
