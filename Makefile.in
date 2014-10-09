@@ -413,7 +413,9 @@ BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstd
 
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
-ifneq ($(target_cpu),arm)
+ifeq ($(BUILD_ANDROID_GCC),yes)
+GCC_CONFIG_ARGS += --disable-libstdc__-v3
+else
 GCC_CONFIG_ARGS += --enable-libstdcxx
 endif
 
@@ -423,8 +425,7 @@ ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
 
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon \
-	 --disable-libstdc__-v3
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon
 endif
 
 ifeq ($(target_cpu),i686)
