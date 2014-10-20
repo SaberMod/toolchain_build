@@ -397,7 +397,7 @@ endif
 
 # General configs for all targets
 GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --enable-threads \
-	--disable-libmudflap --disable-libcilkrts $(GCC_CONFIG_LIBSTDCXX_V3) --disable-shared \
+	--disable-libmudflap --disable-libcilkrts --disable-shared \
 	--disable-libssp --disable-nls --disable-sjlj-exceptions --disable-tls --disable-libitm \
 	--disable-plugin
 ifneq (arm,$(target_cpu))
@@ -414,7 +414,7 @@ BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstd
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
 ifeq ($(BUILD_ANDROID_GCC),yes)
-GCC_CONFIG_ARGS += --disable-libstdc__-v3
+GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libstdc__-v3
 else
 GCC_CONFIG_ARGS += --enable-libstdcxx
 endif
