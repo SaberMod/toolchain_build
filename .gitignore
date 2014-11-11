@@ -36,3 +36,7 @@ config.log
 cloog-0.18.2/
 binutils-gnu/
 Makefile
+binutils-android/
+gcc-SaberMod/
+gdb-android/
+stmp-build-target-gcc
