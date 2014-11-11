@@ -402,7 +402,8 @@ GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --enable-threads \
 	--disable-libssp --disable-libitm --disable-plugin
 
 BINUTILS_CONFIG_ARGS += --with-host-libstdcxx='-static-libgcc -Bstatic -Wl -lstdc++ -static-libstdc++ -Bdynamic -lm' \
-	--with-gold-ldflags='-static-libgcc -static-libstdc++' --enable-install-libbfd --enable-target-optspace
+			--with-gold-ldflags='-static-libgcc -static-libstdc++' \
+			--enable-install-libbfd --enable-target-optspace
 
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 
