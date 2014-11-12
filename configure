@@ -2028,7 +2028,7 @@ case $target in
     BUILD_ANDROID_GCC=yes
     ;;
   i[3456]86-*-linux-gnu | x86_64-*-linux-gnu)
-    BUILD_ANDROID_GCC=no
+    BUILD_ANDROID_GCC=yes
     ;;
   mips*-*-linux*)
     BUILD_ANDROID_GCC=yes

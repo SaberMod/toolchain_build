@@ -417,7 +417,7 @@ GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon
 endif
 
 ifeq ($(BUILD_ANDROID_GCC),yes)
-GCC_CONFIG_ARGS += --disable-libstdc__-v3 --disable-libgomp
+GCC_CONFIG_ARGS += --disable-libstdc__-v3
 endif
 
 ifeq ($(target_cpu),i686)
