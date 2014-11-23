@@ -417,7 +417,9 @@ GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon
 endif
 
 ifeq ($(BUILD_ANDROID_GCC),yes)
-GCC_CONFIG_ARGS += --disable-libstdc__-v3
+GCC_CONFIG_ARGS += --disable-libstdc__-v3 --disable-plugin
+else
+GCC_CONFIG_ARGS += --enable-libstdc__-v3 --enable-libstdcxx --enable-plugin
 endif
 
 ifeq ($(target_cpu),i686)
@@ -426,7 +428,7 @@ BINUTILS_CONFIG_ARGS += --disable-dependency-tracking
 endif
 
 ifeq ($(target_cpu),x86_64)
-GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32 --enable-libstdc__-v3
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32
 BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --disable-dependency-tracking
 endif
 
