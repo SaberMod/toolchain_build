@@ -402,7 +402,7 @@ GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --enable-threads \
 	--disable-libssp --disable-libitm --disable-plugin --disable-libstdc__-v3
 
 BINUTILS_CONFIG_ARGS += --enable-install-libbfd --enable-target-optspace
-ifneq (ENABLE_GOLD),)
+ifneq ($(ENABLE_GOLD),)
 BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
 endif
 
