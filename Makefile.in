@@ -399,15 +399,23 @@ endif
 # General configs for all targets
 GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --enable-threads \
 	$(GCC_CONFIG_LIBSTDCXX_V3) --disable-shared --enable-target-optspace \
-	--disable-libssp --disable-libitm --disable-plugin --disable-libstdc__-v3
+	--disable-libssp --disable-libitm --disable-plugin 
+ifneq ($(target_os),linux-gnu)
+GCC_CONFIG_ARGS += --disable-libstdc__-v3
+endif
 
 BINUTILS_CONFIG_ARGS += --enable-install-libbfd --enable-target-optspace
 ifneq ($(ENABLE_GOLD),)
 BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
 endif
 
+ifneq ($(target_os),linux-gnu)
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 CXXFLAGS_FOR_TARGET += -fno-short-emums -DTARGET_POSIX_IO
+else
+CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
+CXXFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
+endif
 
 LD += -ldl -lpthread -lrt
 CC += -pthread
