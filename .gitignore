@@ -27,6 +27,7 @@ stmp-build-host-cloog
 mpfr-gnu/
 mpc-gnu/
 isl-0.13/
+isl-0.14
 gmp-gnu/
 gdb-gnu/
 gcc-gnu-stable/
@@ -34,6 +35,7 @@ expat-2.0.1/
 config.status
 config.log
 cloog-0.18.2/
+cloog-0.18.3/
 binutils-gnu/
 Makefile
 binutils-android/
