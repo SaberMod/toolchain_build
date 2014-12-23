@@ -555,7 +555,6 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-have_expat
 have_cloog
 have_isl
 have_ppl
@@ -564,7 +563,6 @@ have_mpfr
 have_mpc
 sysroot
 WITH_PYTHON
-EXPAT_VERSION
 GDB_MIN_VERSION_7_2
 GDB_VERSION
 CLOOG_VERSION
@@ -660,7 +658,6 @@ with_ppl_version
 with_cloog_version
 with_isl_version
 with_gdb_version
-with_expat_version
 with_python
 with_sysroot
 with_mpc
@@ -669,7 +666,6 @@ with_gmp
 with_ppl
 with_cloog
 with_isl
-with_expat
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1321,8 +1317,6 @@ Optional Packages:
                           use isl-VERSION (default is 0.11.1)
   --with-gdb-version=VERSION
                           use gdb-VERSION (default is 6.6)
-  --with-expat-version=VERSION
-                          use expat-VERSION (default is 2.0.1)
   --with-python=WITH_PYTHON
                           use python WITH_PYTHON)
   --with-sysroot=DIR
@@ -1339,8 +1333,6 @@ Optional Packages:
                           specify prefix directory for the installed CLooG package.
   --with-isl=PATH
                           specify prefix directory for the installed ISL package.
-  --with-expat=PATH
-                          specify prefix directory for the installed EXPAT package.
 
 Report bugs to the package provider.
 _ACEOF
@@ -2759,67 +2751,6 @@ if test \( ! -d $srcdir/../$tool/gdb-${GDB_VERSION} \) -a \( x"$version" != x"no
     as_fn_error "'package gdb-${GDB_VERSION} does not exist.'" "$LINENO" 5
   fi
 fi
-
-# figure out if we need to build expat for gdb 7.2+
-gdb_version_file="${srcdir}/../gdb/gdb-${GDB_VERSION}/gdb/version.in"
-if test -f "${gdb_version_file}"; then
-  GDB_MAJOR=`head -n 1 $gdb_version_file | sed  -e "s/[^0-9].*//"`
-  GDB_MINOR=`head -n 1 $gdb_version_file | \
-	    sed  -e "s/^[0-9]*\.//" -e "s/[^0-9].*//"`
-  if test "$GDB_MAJOR" -gt 7 -o \
-          \( "$GDB_MAJOR" -eq 7 -a "$GDB_MINOR" -ge 2 \) ; then
-    GDB_MIN_VERSION_7_2="yes"
-  else
-    GDB_MIN_VERSION_7_2="no"
-  fi
-else
-  # No version file, assume it is trunk
-  GDB_MIN_VERSION_7_2="yes"
-fi
-
-
-if test "$GDB_MIN_VERSION_7_2" == "yes"; then
-# expat version (default is 2.0.1)
-# expat is only used for gdb version higher than 7.2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking expat version" >&5
-$as_echo_n "checking expat version... " >&6; }
-
-# Check whether --with-expat-version was given.
-if test "${with_expat_version+set}" = set; then :
-  withval=$with_expat_version; if test x"$withval" != x ; then
-     EXPAT_VERSION="$withval"
-   fi
-else
-  EXPAT_VERSION="2.0.1"
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $EXPAT_VERSION" >&5
-$as_echo "$EXPAT_VERSION" >&6; }
-x=expat-${EXPAT_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
-if test \( ! -d $srcdir/../$tool/expat-${EXPAT_VERSION} \) -a \( x"$version" != x"none"  \) ; then
-  if test -f $srcdir/../$tool/expat-${EXPAT_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/expat-${EXPAT_VERSION}.tar
-  elif test -f $srcdir/../$tool/expat-${EXPAT_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/expat-${EXPAT_VERSION}.tar.gz
-  elif test -f $srcdir/../$tool/expat-${EXPAT_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/expat-${EXPAT_VERSION}.tgz
-  elif test -f $srcdir/../$tool/expat-${EXPAT_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/expat-${EXPAT_VERSION}.tar.bz2
-  elif test -f $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar
-  elif test -f $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar.gz
-  elif test -f $srcdir/../tarballs/expat-${EXPAT_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/expat-${EXPAT_VERSION}.tgz
-  elif test -f $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/expat-${EXPAT_VERSION}.tar.bz2
-  else
-    as_fn_error "'package expat-${EXPAT_VERSION} does not exist.'" "$LINENO" 5
-  fi
-fi
-fi
-
-
 if test "$GDB_MIN_VERSION_7_2" == "yes"; then
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking with python" >&5
 $as_echo_n "checking with python... " >&6; }
@@ -2974,23 +2905,6 @@ if test "${with_isl+set}" = set; then :
    fi
 else
   have_isl=no
-fi
-
-
-
-# Specify a location for expat
-
-# Check whether --with-expat was given.
-if test "${with_expat+set}" = set; then :
-  withval=$with_expat; if test -d "$withval" ; then
-     have_expat="$withval"
-   elif test x"$withval" != x"no"; then
-     as_fn_error "invalid value for --with-expat" "$LINENO" 5
-   else
-     have_expat=no
-   fi
-else
-  have_expat=no
 fi
 
 

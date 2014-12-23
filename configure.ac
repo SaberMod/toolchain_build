@@ -525,39 +525,6 @@ AC_MSG_RESULT($GDB_VERSION)
 AC_SUBST(GDB_VERSION)
 ANDROID_CHECK_PACKAGE(gdb-${GDB_VERSION})
 
-# figure out if we need to build expat for gdb 7.2+
-gdb_version_file="${srcdir}/../gdb/gdb-${GDB_VERSION}/gdb/version.in"
-if test -f "${gdb_version_file}"; then
-  GDB_MAJOR=`head -n 1 $gdb_version_file | sed  -e "s/[[^0-9]].*//"`
-  GDB_MINOR=`head -n 1 $gdb_version_file | \
-	    sed  -e "s/^[[0-9]]*\.//" -e "s/[[^0-9]].*//"`
-  if test "$GDB_MAJOR" -gt 7 -o \
-          \( "$GDB_MAJOR" -eq 7 -a "$GDB_MINOR" -ge 2 \) ; then
-    GDB_MIN_VERSION_7_2="yes"
-  else
-    GDB_MIN_VERSION_7_2="no"
-  fi
-else
-  # No version file, assume it is trunk
-  GDB_MIN_VERSION_7_2="yes"
-fi
-AC_SUBST(GDB_MIN_VERSION_7_2)
-
-if test "$GDB_MIN_VERSION_7_2" == "yes"; then
-# expat version (default is 2.0.1)
-# expat is only used for gdb version higher than 7.2
-AC_MSG_CHECKING([expat version])
-AC_ARG_WITH([expat-version],
-  [  --with-expat-version=VERSION
-                          use expat-VERSION (default is 2.0.1)],
-  [if test x"$withval" != x ; then
-     EXPAT_VERSION="$withval"
-   fi],
-[EXPAT_VERSION="2.0.1"])
-AC_MSG_RESULT($EXPAT_VERSION)
-ANDROID_CHECK_PACKAGE(expat-${EXPAT_VERSION})
-fi
-AC_SUBST(EXPAT_VERSION)
 
 if test "$GDB_MIN_VERSION_7_2" == "yes"; then
 AC_MSG_CHECKING([with python])
@@ -686,18 +653,5 @@ AC_ARG_WITH(isl, [  --with-isl=PATH
    fi],
   [have_isl=no])
 AC_SUBST(have_isl)
-
-# Specify a location for expat
-AC_ARG_WITH(expat, [  --with-expat=PATH
-                          specify prefix directory for the installed EXPAT package.],
-  [if test -d "$withval" ; then
-     have_expat="$withval"
-   elif test x"$withval" != x"no"; then
-     AC_MSG_ERROR(invalid value for --with-expat)
-   else
-     have_expat=no
-   fi],
-  [have_expat=no])
-AC_SUBST(have_expat)
 
 AC_OUTPUT

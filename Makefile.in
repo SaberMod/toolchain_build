@@ -85,7 +85,6 @@ PPL_VERSION=ppl-@PPL_VERSION@
 CLOOG_VERSION=cloog-@CLOOG_VERSION@
 ISL_VERSION=isl-@ISL_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
-EXPAT_VERSION=expat-@EXPAT_VERSION@
 WITH_PYTHON=@WITH_PYTHON@
 HAVE_MPC=@have_mpc@
 HAVE_MPFR=@have_mpfr@
@@ -93,7 +92,6 @@ HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
 HAVE_ISL=@have_isl@
-HAVE_EXPAT=@have_expat@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
@@ -124,10 +122,6 @@ endif
 
 ifeq ($(HAVE_ISL), no)
   ISL_DIR=$(TEMP_INSTALLDIR)
-endif
-
-ifeq ($(HAVE_EXPAT),no)
-  EXPAT_DIR=$(TEMP_INSTALLDIR)
 endif
 
 ifneq ($(WITH_PYTHON),)
@@ -709,30 +703,6 @@ stmp-install-host-cloog:
 endif
 install-host-cloog: stmp-install-host-cloog
 
-# host expat rules
-.PHONY: config-host-expat build-host-expat install-host-expat
-config-host-expat: stmp-config-host-expat
-EXPAT_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
-	--host=${cur_host} --build=${cur_build}
-stmp-config-host-expat: config.status  $(canadian_stmp)
-	([ -d ${EXPAT_VERSION} ] || \
-	  mkdir ${EXPAT_VERSION}) && \
-	($(canadian_env) \
-	 cd ${EXPAT_VERSION} ; \
-	 $(call find-package-srcdir, ${EXPAT_VERSION})/configure \
-	  $(EXPAT_CONFIG_ARGS)) && \
-	$(STAMP) $@
-stmp-build-host-expat: stmp-config-host-expat
-	($(canadian_env) \
-	 $(MAKE) -C ${EXPAT_VERSION}) && $(STAMP) $@
-build-host-expat: stmp_build-host-expat
-ifeq ($(HAVE_EXPAT),no)
-stmp-install-host-expat: stmp-build-host-expat
-	$(MAKE) -C ${EXPAT_VERSION} install -j1 && $(STAMP) $@
-else
-stmp-install-host-expat:
-endif
-install-host-expat: stmp-install-host-expat
 
 # target gdb rules
 .PHONY: config-target-gdb build-target-gdb install-target-gdb
@@ -746,10 +716,6 @@ config-target-gdb: stmp-config-target-gdb
 GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
 	$(WITH_PYTHON) --disable-nls --disable-shared
-
-# For gdb versions 7.2 and higher, expat is required.
-stmp-config-target-gdb: stmp-install-host-expat
-GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
 
 stmp-config-target-gdb: config.status $(canadian_stmp)
 	([ -d ${GDB_VERSION} ] || \
