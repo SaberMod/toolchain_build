@@ -27,7 +27,8 @@ stmp-build-host-cloog
 mpfr-gnu/
 mpc-gnu/
 isl-0.13/
-isl-0.14
+isl-0.14/
+osl-0.9.0/
 gmp-gnu/
 gdb-gnu/
 gcc-gnu-stable/

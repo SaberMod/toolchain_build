@@ -486,7 +486,8 @@ case $CLOOG_VERSION in
     ;;
   0.16*|0.17*|0.18*)
     # CLooG 0.16+ has its own embedded polyhedral library
-    CLOOG_BACKEND="--enable-cloog-backend=isl"
+    CLOOG_BACKEND_ISL="--enable-cloog-backend=isl"
+    CLOOG_BACKEND_OSL="--enable-cloog-backend=osl"
     ;;
   *)
     AC_MSG_ERROR(Unsupported cloog version);
@@ -509,8 +510,22 @@ AC_ARG_WITH([isl-version],
 [ISL_VERSION="0.11.1"])
 AC_MSG_RESULT($ISL_VERSION)
 ANDROID_CHECK_PACKAGE(isl-${ISL_VERSION})
+
+# osl version (default is 0.9.0)
+# osl is only used for gcc 4.8+ with graphite optimization.
+AC_MSG_CHECKING([osl version])
+AC_ARG_WITH([osl-version],
+  [  --with-osl-version=VERSION
+                         use osl-VERSION (default is 0.9.0)],
+  [if test x"$withval" != x ; then
+     OSL_VERSION="$withval"
+   fi],
+[OSL_VERSION="0.9.0"])
+AC_MSG_RESULT($OSL_VERSION)
+ANDROID_CHECK_PACKAGE(osl-${OSL_VERSION})
 fi
 AC_SUBST(ISL_VERSION)
+AC_SUBST(OSL_VERSION)
 
 # gdb version (default is 6.6)
 AC_MSG_CHECKING([target gdb version to build])
@@ -653,5 +668,18 @@ AC_ARG_WITH(isl, [  --with-isl=PATH
    fi],
   [have_isl=no])
 AC_SUBST(have_isl)
+
+# Specify a location for osl
+AC_ARG_WITH(osl, [  --with-osl=PATH
+                          specify prefix directory for the installed OSL package.],
+  [if test -d "$withval" ; then
+     have_osl="$withval"
+   elif test x"$withval" != x"no"; then
+     AC_MSG_ERROR(invalid value for --with-osl)
+   else
+     have_osl=no
+   fi],
+  [have_osl=no])
+AC_SUBST(have_osl)
 
 AC_OUTPUT
