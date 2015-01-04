@@ -557,7 +557,6 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 have_cloog
 have_isl
-have_osl
 have_ppl
 have_gmp
 have_mpfr
@@ -567,10 +566,8 @@ WITH_PYTHON
 GDB_MIN_VERSION_7_2
 GDB_VERSION
 CLOOG_VERSION
-CLOOG_BACKEND_ISL
-CLOOG_BACKEND_OSL
+CLOOG_BACKEND
 ISL_VERSION
-OSL_VERSION
 PPL_VERSION
 MPC_VERSION
 MPFR_VERSION
@@ -660,7 +657,6 @@ with_mpc_version
 with_ppl_version
 with_cloog_version
 with_isl_version
-with_osl_version
 with_gdb_version
 with_python
 with_sysroot
@@ -670,7 +666,6 @@ with_gmp
 with_ppl
 with_cloog
 with_isl
-with_osl
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1320,8 +1315,6 @@ Optional Packages:
                           use cloog-VERSION (default is 0.15.9)
   --with-isl-version=VERSION
                           use isl-VERSION (default is 0.11.1)
-  --with-osl-version=VERSION
-                          use osl-VERSION (default is 0.9.0)
   --with-gdb-version=VERSION
                           use gdb-VERSION (default is 6.6)
   --with-python=WITH_PYTHON
@@ -1340,8 +1333,6 @@ Optional Packages:
                           specify prefix directory for the installed CLooG package.
   --with-isl=PATH
                           specify prefix directory for the installed ISL package.
-  --with-osl=PATH
-                          specify prefix directory for the installed OSL package.
 
 Report bugs to the package provider.
 _ACEOF
@@ -2652,8 +2643,7 @@ else
 fi
 
 # CLooG 0.16+ has its own embedded polyhedral library
-#CLOOG_BACKEND_ISL="--enable-cloog-backend=isl"
-CLOOG_BACKEND_OSL="--enable-cloog-backend=osl"
+CLOOG_BACKEND="--enable-cloog-backend=isl"
 
 x=cloog-${CLOOG_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
 if test \( ! -d $srcdir/../$tool/cloog-${CLOOG_VERSION} \) -a \( x"$version" != x"none"  \) ; then
@@ -2719,46 +2709,9 @@ if test \( ! -d $srcdir/../$tool/isl-${ISL_VERSION} \) -a \( x"$version" != x"no
     as_fn_error "'package isl-${ISL_VERSION} does not exist.'" "$LINENO" 5
   fi
 fi
-
-# osl version (default is 0.9.0)
-# osl is only used for gcc 4.8+ with graphite optimization.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking osl version" >&5
-$as_echo_n "checking osl version... " >&6; }
-
-# Check whether --with-osl-version was given.
-if test "${with_osl_version+set}" = set; then :
-  withval=$with_osl_version; if test x"$withval" != x ; then
-     OSL_VERSION="$withval"
-   fi
-else
-  OSL_VERSION="0.9.0"
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $OSL_VERSION" >&5
-$as_echo "$OSL_VERSION" >&6; }
-x=osl-${OSL_VERSION}; tool=$(echo "$x" | sed -e 's/-.*//'); version=$(echo "$x" | sed -e 's/[^-]*-//'); \
-if test \( ! -d $srcdir/../$tool/osl-${OSL_VERSION} \) -a \( x"$version" != x"none"  \) ; then
-  if test -f $srcdir/../$tool/osl-${OSL_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../$tool/osl-${OSL_VERSION}.tar
-  elif test -f $srcdir/../$tool/osl-${OSL_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/osl-${OSL_VERSION}.tar.gz
-  elif test -f $srcdir/../$tool/osl-${OSL_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../$tool/osl-${OSL_VERSION}.tgz
-  elif test -f $srcdir/../$tool/osl-${OSL_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../$tool/osl-${OSL_VERSION}.tar.bz2
-  elif test -f $srcdir/../tarballs/osl-${OSL_VERSION}.tar ; then
-    mkdir -p temp-src && tar -C temp-src -xf $srcdir/../tarballs/osl-${OSL_VERSION}.tar
-  elif test -f $srcdir/../tarballs/osl-${OSL_VERSION}.tar.gz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/osl-${OSL_VERSION}.tar.gz
-  elif test -f $srcdir/../tarballs/osl-${OSL_VERSION}.tgz ; then
-    mkdir -p temp-src && tar -C temp-src -xzf $srcdir/../tarballs/osl-${OSL_VERSION}.tgz
-  elif test -f $srcdir/../tarballs/osl-${OSL_VERSION}.tar.bz2 ; then
-    mkdir -p temp-src && tar -C temp-src -xjf $srcdir/../tarballs/osl-${OSL_VERSION}.tar.bz2
-  else
-    as_fn_error "'package osl-${OSL_VERSION} does not exist.'" "$LINENO" 5
-  fi
-fi
-fi
+
 
 # gdb version (default is 6.6)
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking target gdb version to build" >&5
@@ -2954,20 +2907,6 @@ else
   have_isl=no
 fi
 
-# Specify a location for osl
-
-# Check whether --with-osl was given.
-if test "${with_osl+set}" = set; then :
-  withval=$with_osl; if test -d "$withval" ; then
-     have_osl="$withval"
-   elif test x"$withval" != x"no"; then
-     as_fn_error "invalid value for --with-osl" "$LINENO" 5
-   else
-     have_osl=no
-   fi
-else
-  have_osl=no
-fi
 
 
 cat >confcache <<\_ACEOF

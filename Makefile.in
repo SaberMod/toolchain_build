@@ -84,7 +84,6 @@ MPC_VERSION=mpc-@MPC_VERSION@
 PPL_VERSION=ppl-@PPL_VERSION@
 CLOOG_VERSION=cloog-@CLOOG_VERSION@
 ISL_VERSION=isl-@ISL_VERSION@
-OSL_VERSION=osl-@OSL_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
 WITH_PYTHON=@WITH_PYTHON@
 HAVE_MPC=@have_mpc@
@@ -93,7 +92,6 @@ HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
 HAVE_ISL=@have_isl@
-HAVE_OSL=@have_osl@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
@@ -124,10 +122,6 @@ endif
 
 ifeq ($(HAVE_ISL), no)
   ISL_DIR=$(TEMP_INSTALLDIR)
-endif
-
-ifeq ($(HAVE_OSL), no)
-  OSL_DIR=$(TEMP_INSTALLDIR)
 endif
 
 ifneq ($(WITH_PYTHON),)
@@ -308,9 +302,8 @@ BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
 	$(baseargs) --disable-shared --disable-nls --disable-werror
 ifeq ($(ENABLE_GRAPHITE),yes)
-BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-osl=${OSL_DIR} \
-	--with-gmp=${GMP_DIR} --disable-ppl-version-check --disable-cloog-version-check \
-	--disable-isl-version-check --disable-osl-version-check $(CLOOG_BACKEND_ISL) $(CLOOG_BACKEND_OSL)
+BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 endif
 # Enable dual linker support and make gold as default linker when gold is
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
@@ -320,7 +313,7 @@ BINUTILS_CONFIG_ARGS += --enable-gold=default
 endif
 endif
 
-stmp-config-target-binutils: config.status stmp-install-host-isl stmp-install-host-osl $(canadian_stmp)
+stmp-config-target-binutils: config.status stmp-install-host-isl $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
 	($(canadian_env) \
@@ -390,13 +383,11 @@ GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
 # For gcc 4.5 and 4.6 with graphite optimization, cloog and ppl are required.
 # For gcc 4.8+ with graphite optimization, cloog and isl are required.
 ifeq ($(ENABLE_GRAPHITE),yes)
-GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-osl=${OSL_DIR} \
-	--with-osl=${OSL_DIR} --disable-ppl-version-check \
-	--disable-cloog-version-check --disable-isl-version-check --disable-osl-version-check \
-	-- $(CLOOG_BACKEND_ISL) $(CLOOG_BACKEND_OSL)
+GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 else
-# Disable ppl, isl, osl and cloog just in case the host have them install.
-GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl --without-osl
+# Disable ppl, isl and cloog just in case the host have them install.
+GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
 
 # General configs for all targets
@@ -454,7 +445,7 @@ GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
-stmp-config-target-gcc: config.status stmp-install-host-isl stmp-install-host-osl stmp-install-host-cloog stmp-build-target-binutils
+stmp-config-target-gcc: config.status stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
 	([ -d ${GCC_VERSION} ] || \
 	  mkdir ${GCC_VERSION}) && \
 	($(canadian_env) \
@@ -661,39 +652,6 @@ stmp-install-host-isl:
 endif
 install-host-isl: stmp-install-host-isl
 
-# host osl rules
-.PHONY: config-host-osl build-host-osl install-host-osl
-config-host-osl: stmp-config-host-osl
-OSL_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
-	  --target=${target_alias} \
-	  --host=${host} --build=${build} \
-	  --disable-nls
-stmp-config-host-osl: config.status stmp-install-host-gmp
-	([ -d ${OSL_VERSION} ] || \
-	 mkdir ${OSL_VERSION}) && \
-	($(canadian_env) \
-	 cd ${OSL_VERSION} ; \
-         export CFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
-         export CXXFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
-         export LDFLAGS="${LDFLAGS} -L$(GMP_DIR)/lib" ; \
-	$(call find-package-srcdir, ${OSL_VERSION})/configure \
-	 $(OSL_CONFIG_ARGS)) && \
-	$(STAMP) $@
-stmp-build-host-osl: stmp-config-host-osl
-	$(MAKE) -C ${OSL_VERSION} && $(STAMP) $@
-build-host-osl: stmp-build-host-osl
-
-ifeq ($(ENABLE_GRAPHITE),yes)
-stmp-install-host-osl: stmp-build-host-osl
-	$(MAKE) -C ${OSL_VERSION} install && \
-	$(STAMP) $@
-else
-stmp-install-host-osl:
-	$(STAMP) $@
-endif
-install-host-osl: stmp-install-host-osl
-
-
 # host cloog rules
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
@@ -714,8 +672,8 @@ stmp-install-host-ppl-workaround:
 	$(STAMP) $@
 CLOOG_CONFIG_ARGS+= --with-gmp=$(GMP_DIR) --with-ppl=$(PPL_DIR)
 else
-CLOOG_TARGET = libcloog-isl.la libisl.la libosl.la
-CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=bundled
+CLOOG_TARGET = libcloog-isl.la
+CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR)
 endif
 stmp-config-host-cloog: config.status stmp-install-host-gmp
 	([ -d ${CLOOG_VERSION} ] || \
@@ -736,8 +694,6 @@ stmp-install-host-cloog: stmp-build-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
 	$(MAKE) -C ${CLOOG_VERSION}/isl install-libLTLIBRARIES \
-		install-pkgincludeHEADERS
-	$(MAKE) -C ${CLOOG_VERSION}/osl install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
 	$(MAKE) -C ${CLOOG_VERSION} install
 	$(STAMP) $@
