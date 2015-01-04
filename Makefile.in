@@ -673,7 +673,7 @@ stmp-install-host-ppl-workaround:
 CLOOG_CONFIG_ARGS+= --with-gmp=$(GMP_DIR) --with-ppl=$(PPL_DIR)
 else
 CLOOG_TARGET = libcloog-isl.la
-CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR)
+CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=bundled
 endif
 stmp-config-host-cloog: config.status stmp-install-host-gmp
 	([ -d ${CLOOG_VERSION} ] || \
