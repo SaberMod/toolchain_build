@@ -60,6 +60,7 @@ host_baseargs = @host_baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
 GCC_MIN_VERSION_4_8_0:=@GCC_MIN_VERSION_4_8_0@
+GCC_MIN_VERSION_4_9_0:=@GCC_MIN_VERSION_4_9_0@
 GDB_MIN_VERSION_7_2:=@GDB_MIN_VERSION_7_2@
 BINUTILS_MIN_VERSION_2_21:=@BINUTILS_MIN_VERSION_2_21@
 GOLD_MIN_VERSION_2_21:=@GOLD_MIN_VERSION_2_21@
@@ -407,12 +408,13 @@ LD += -ldl -lpthread -lrt
 CC += -pthread
 CXX += -pthread
 
-ifneq ($(target_os),linux-gnu)
-CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
-CXXFLAGS_FOR_TARGET += -fno-short-emums -DTARGET_POSIX_IO
-else
+# -fno-short-enums does not work on GCC version >=4.9
+ifneq ($(GCC_MIN_VERSION_4_9_0),no)
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
 CXXFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
+else
+CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
+CXXFLAGS_FOR_TARGET += -fno-short-emums -DTARGET_POSIX_IO
 endif
 
 # Android and ARM
