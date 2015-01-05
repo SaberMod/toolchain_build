@@ -403,6 +403,10 @@ ifneq ($(ENABLE_GOLD),)
 BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
 endif
 
+LD += -ldl -lpthread -lrt
+CC += -pthread
+CXX += -pthread
+
 ifneq ($(target_os),linux-gnu)
 CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
 CXXFLAGS_FOR_TARGET += -fno-short-emums -DTARGET_POSIX_IO
@@ -410,10 +414,6 @@ else
 CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
 CXXFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
 endif
-
-LD += -ldl -lpthread -lrt
-CC += -pthread
-CXX += -pthread
 
 # Android and ARM
 ifeq (arm,$(target_cpu))
@@ -673,7 +673,7 @@ stmp-install-host-ppl-workaround:
 CLOOG_CONFIG_ARGS+= --with-gmp=$(GMP_DIR) --with-ppl=$(PPL_DIR)
 else
 CLOOG_TARGET = libcloog-isl.la
-CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=bundled
+CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=system
 endif
 stmp-config-host-cloog: config.status stmp-install-host-gmp
 	([ -d ${CLOOG_VERSION} ] || \
