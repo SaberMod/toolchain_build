@@ -1,17 +1,50 @@
 #!/bin/bash
 
+# Copyright (C) 2014 The SaberMod Project
+# This file is free software; The SaberMod Project
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
 panic ()
 {
     echo "ERROR: $@"
     exit 1
 }
 
+if [ $SET_TARGET_BUILD = "CLOOG" ];
+then
+
 panic "**************ERROR*****************
        **************ERROR*****************
        **************ERROR*****************
                                            
-             Sorry your build failed
+       Sorry your build failed because
+       cloog failed to build the required
+       libraries.  Please uninstall any
+       cloog-isl packages such as
+       libcloog-isl-dev
                                            
        **************ERROR*****************
        **************ERROR*****************
        **************ERROR*****************";
+fi;
+
+if [ $SET_TARGET_BUILD = "GCC" ];
+then
+
+panic "**************ERROR*****************
+       **************ERROR*****************
+       **************ERROR*****************
+                                           
+             GCC has failed to build
+                                           
+       **************ERROR*****************
+       **************ERROR*****************
+       **************ERROR*****************";
+fi;
+
