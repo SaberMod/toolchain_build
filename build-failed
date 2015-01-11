@@ -19,19 +19,19 @@ panic ()
 if [ $SET_TARGET_BUILD = "CLOOG" ];
 then
 
-panic "**************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************
+panic "********************************ERROR*******************************
+       ********************************ERROR*******************************
+       ********************************ERROR*******************************
                                            
        Sorry your build failed because
        cloog failed to build the required
-       libraries.  Please uninstall any
-       cloog-isl packages such as
-       libcloog-isl-dev
+       libraries.  Please see:
+       https://github.com/SaberMod/toolchain_manifest/blob/master/README.md
+       for instructions on installing the prebuilt libs for cloog
                                            
-       **************ERROR*****************
-       **************ERROR*****************
-       **************ERROR*****************";
+       ********************************ERROR*******************************
+       ********************************ERROR*******************************
+       ********************************ERROR*******************************";
 fi;
 
 if [ $SET_TARGET_BUILD = "GCC" ];
