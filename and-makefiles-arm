@@ -97,25 +97,14 @@ echo '# Copyright (C) 2015 The SaberMod Project
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-LOCAL_PATH := $(call my-dir)
-ifndef LOCAL_PREBUILT_LIBS
-LOCAL_PREBUILT_LIBS := \
-libcloog-isl.so \
-libcloog-isl.a \
-libisl.so \
-libisl.a \
-libosl.so \
-libosl.a
-else
-LOCAL_PREBUILT_LIBS += \
-libcloog-isl.so \
-libcloog-isl.a \
-libisl.so \
-libisl.a \
-libosl.so \
-libosl.a
-endif
 
-LOCAL_MODULE_TAGS := optional
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libcloog-isl
+LOCAL_SRC_FILES := libcloog-isl.so.4
+LOCAL_MODULE_SUFFIX := .so.4
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := $(call my-dir)
 include $(BUILD_HOST_PREBUILT)' > $SYSROOT_LIB_PATH/Android.mk;
 
