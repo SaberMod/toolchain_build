@@ -657,7 +657,7 @@ install-host-isl: stmp-install-host-isl
 # host cloog rules
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
-CLOOG_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
+CLOOG_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared --enable-static \
 	  --target=${target_alias} \
 	  --host=${host} --build=${build} \
 	  --disable-nls
