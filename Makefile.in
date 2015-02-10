@@ -435,7 +435,13 @@ ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
 
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a
+endif
+
+# Android and ARM64
+ifeq (aarch64,$(target_cpu))
+GCC_CONFIG_ARGS += --with-arch=armv8-a
+BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd
 endif
 
 ifeq ($(target_cpu),i686)
