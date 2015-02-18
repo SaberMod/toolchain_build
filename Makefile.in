@@ -433,6 +433,9 @@ endif
 ifeq (arm,$(target_cpu))
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
+TARGET_ARCH := arm-eabi
+else
+TARGET_ARCH := arm-linux-androideabi
 endif
 
 GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a --enable-target-optspace
@@ -443,6 +446,8 @@ endif
 ifeq (aarch64,$(target_cpu))
 GCC_CONFIG_ARGS += --with-arch=armv8-a --enable-target-optspace
 BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --enable-install-libbfd --enable-target-optspace
+
+TARGET_ARCH := aarch64-linux-android
 endif
 
 ifeq ($(target_cpu),i686)
@@ -454,6 +459,8 @@ ifeq ($(target_cpu),x86_64)
 GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32 \
 	--enable-plugin
 BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --disable-dependency-tracking
+
+TARGET_ARCH := x86_64-linux
 endif
 
 # We add the baseargs at the end so that they override any default args for GCC only..
@@ -694,7 +701,7 @@ stmp-install-host-ppl-workaround:
 CLOOG_CONFIG_ARGS+= --with-gmp=$(GMP_DIR) --with-ppl=$(PPL_DIR)
 else
 CLOOG_TARGET = libcloog-isl.la
-CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=system
+CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=system --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=$(TARGET_ARCH)
 endif
 stmp-config-host-cloog: config.status stmp-install-host-gmp
 	([ -d ${CLOOG_VERSION} ] || \
