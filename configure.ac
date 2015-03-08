@@ -372,13 +372,21 @@ if test -f "${gcc_version_file}"; then
   else
     GCC_MIN_VERSION_4_5_0="no"
   fi
+  if test "$GCC_MAJOR" -gt 4 -o \
+              \( "$GCC_MAJOR" -eq 4 -a "$GCC_MINOR" -ge 8 \) ; then
+    GCC_MIN_VERSION_4_8_0="yes"
+  else
+    GCC_MIN_VERSION_4_8_0="no"
+  fi
 else
   # No version file, assume it is trunk
   GCC_MIN_VERSION_4_3_0="yes"
   GCC_MIN_VERSION_4_5_0="yes"
+  GCC_MIN_VERSION_4_8_0="yes"
 fi
 AC_SUBST(GCC_MIN_VERSION_4_3_0)
 AC_SUBST(GCC_MIN_VERSION_4_5_0)
+AC_SUBST(GCC_MIN_VERSION_4_8_0)
 
 # newlib version (default is 1.16.0)
 # newlib is only used for arm-newlib-eabi for testing
@@ -445,7 +453,7 @@ AC_SUBST(MPC_VERSION)
 
 if test "$ENABLE_GRAPHITE" == "yes"; then
 # ppl version (default is 0.11.2)
-# ppl is only used for gcc 4.5+ with graphite optimization.
+# ppl is only used for gcc 4.5 and 4.6 with graphite optimization.
 AC_MSG_CHECKING([ppl version])
 AC_ARG_WITH([ppl-version],
   [  --with-ppl-version=VERSION
@@ -488,6 +496,22 @@ ANDROID_CHECK_PACKAGE(cloog-${CLOOG_VERSION})
 fi
 AC_SUBST(CLOOG_VERSION)
 
+if test "$ENABLE_GRAPHITE" == "yes"; then
+# isl version (default is 0.11.1)
+# isl is only used for gcc 4.8+ with graphite optimization.
+AC_MSG_CHECKING([isl version])
+AC_ARG_WITH([isl-version],
+  [  --with-isl-version=VERSION
+                         use isl-VERSION (default is 0.11.1)],
+  [if test x"$withval" != x ; then
+     ISL_VERSION="$withval"
+   fi],
+[ISL_VERSION="0.11.1"])
+AC_MSG_RESULT($ISL_VERSION)
+ANDROID_CHECK_PACKAGE(isl-${ISL_VERSION})
+fi
+AC_SUBST(ISL_VERSION)
+
 # gdb version (default is 6.6)
 AC_MSG_CHECKING([target gdb version to build])
 AC_ARG_WITH([gdb-version],
@@ -501,39 +525,19 @@ AC_MSG_RESULT($GDB_VERSION)
 AC_SUBST(GDB_VERSION)
 ANDROID_CHECK_PACKAGE(gdb-${GDB_VERSION})
 
-# figure out if we need to build expat for gdb 7.2+
-gdb_version_file="${srcdir}/../gdb/gdb-${GDB_VERSION}/gdb/version.in"
-if test -f "${gdb_version_file}"; then
-  GDB_MAJOR=`head -n 1 $gdb_version_file | sed  -e "s/[[^0-9]].*//"`
-  GDB_MINOR=`head -n 1 $gdb_version_file | \
-	    sed  -e "s/^[[0-9]]*\.//" -e "s/[[^0-9]].*//"`
-  if test "$GDB_MAJOR" -gt 7 -o \
-          \( "$GDB_MAJOR" -eq 7 -a "$GDB_MINOR" -ge 2 \) ; then
-    GDB_MIN_VERSION_7_2="yes"
-  else
-    GDB_MIN_VERSION_7_2="no"
-  fi
-else
-  # No version file, assume it is trunk
-  GDB_MIN_VERSION_7_2="yes"
-fi
-AC_SUBST(GDB_MIN_VERSION_7_2)
 
 if test "$GDB_MIN_VERSION_7_2" == "yes"; then
-# expat version (default is 2.0.1)
-# expat is only used for gdb version higher than 7.2
-AC_MSG_CHECKING([expat version])
-AC_ARG_WITH([expat-version],
-  [  --with-expat-version=VERSION
-                          use expat-VERSION (default is 2.0.1)],
+AC_MSG_CHECKING([with python])
+AC_ARG_WITH([python],
+  [  --with-python=WITH_PYTHON
+                          use python WITH_PYTHON)],
   [if test x"$withval" != x ; then
-     EXPAT_VERSION="$withval"
+     WITH_PYTHON="$withval"
    fi],
-[EXPAT_VERSION="2.0.1"])
-AC_MSG_RESULT($EXPAT_VERSION)
-ANDROID_CHECK_PACKAGE(expat-${EXPAT_VERSION})
+[WITH_PYTHON=""])
+AC_MSG_RESULT($WITH_PYTHON)
 fi
-AC_SUBST(EXPAT_VERSION)
+AC_SUBST(WITH_PYTHON)
 
 # For certain targets, with gdb 7.2+, the proper gdb target is 
 # arm-linux-android.
@@ -637,17 +641,17 @@ AC_ARG_WITH(cloog, [  --with-cloog=PATH
   [have_cloog=no])
 AC_SUBST(have_cloog)
 
-# Specify a location for expat
-AC_ARG_WITH(expat, [  --with-expat=PATH
-                          specify prefix directory for the installed EXPAT package.],
+# Specify a location for isl
+AC_ARG_WITH(isl, [  --with-isl=PATH
+                          specify prefix directory for the installed ISL package.],
   [if test -d "$withval" ; then
-     have_expat="$withval"
+     have_isl="$withval"
    elif test x"$withval" != x"no"; then
-     AC_MSG_ERROR(invalid value for --with-expat)
+     AC_MSG_ERROR(invalid value for --with-isl)
    else
-     have_expat=no
+     have_isl=no
    fi],
-  [have_expat=no])
-AC_SUBST(have_expat)
+  [have_isl=no])
+AC_SUBST(have_isl)
 
 AC_OUTPUT

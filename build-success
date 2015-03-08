@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Copyright (C) 2015 The SaberMod Project
+# This file is free software; The SaberMod Project
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+success ()
+{
+    echo "SUCCESS: $@"
+}
+
+if [ $SET_TARGET_BUILD = "CLOOG" ];
+then
+
+success "**************SUCCESS*****************
+         **************SUCCESS*****************
+         **************SUCCESS*****************
+                                           
+              CLOOG has successfully built
+                                           
+         **************SUCCESS*****************
+         **************SUCCESS*****************
+         **************SUCCESS*****************";
+fi;
+
+if [ $SET_TARGET_BUILD = "GCC" ];
+then
+
+success "**************SUCCESS*****************
+         **************SUCCESS*****************
+         **************SUCCESS*****************
+                                           
+              GCC has successfully built
+                                           
+         **************SUCCESS*****************
+         **************SUCCESS*****************
+         **************SUCCESS*****************";
+fi;

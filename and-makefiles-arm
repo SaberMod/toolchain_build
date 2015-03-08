@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# Copyright (C) 2015 The SaberMod Project
+# This file is free software; The SaberMod Project
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+# Install android makefiles
+echo '# Copyright (C) 2015 The SaberMod Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# Empty makefile here prevents Android.mk in subdirectories from being
+# unconditionally included.' > $PREFIX_PATH/Android.mk;
+
+echo '# Copyright (C) 2015 The SaberMod Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+	LOCAL_PREBUILT_LIBS := \
+		libbfd.a
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_HOST_PREBUILT)' > $PREFIX_PATH/x86_64-linux-gnu/arm-linux-androideabi/lib/Android.mk;
+
+echo '# Copyright (C) 2015 The SaberMod Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+	LOCAL_PREBUILT_LIBS := \
+		libiberty.a
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_HOST_PREBUILT)' > $PREFIX_PATH/lib/Android.mk;
+
+echo '# Copyright (C) 2015 The SaberMod Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+LOCAL_PATH := $(call my-dir)
+include $(call all-makefiles-under, $(LOCAL_PATH))' > $PREFIX_PATH/toolchain.mk;
+
+echo '# Copyright (C) 2015 The SaberMod Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libcloog-isl
+LOCAL_SRC_FILES := libcloog-isl.so.4
+LOCAL_MODULE_SUFFIX := .so.4
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := $(LOCAL_PATH)
+include $(BUILD_HOST_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libisl
+LOCAL_SRC_FILES := libisl.so.10
+LOCAL_MODULE_SUFFIX := .so.10
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := $(LOCAL_PATH)
+include $(BUILD_HOST_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libosl
+LOCAL_SRC_FILES := libosl.so.0
+LOCAL_MODULE_SUFFIX := .so.0
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := $(LOCAL_PATH)
+include $(BUILD_HOST_PREBUILT)' > $SYSROOT_LIB_PATH/Android.mk;
+

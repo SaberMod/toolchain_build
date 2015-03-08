@@ -1,3 +1,17 @@
+# Copyright (C) 2014-2015 The SaberMod Project
+
+#Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 # -------------------------------
 # Standard Autoconf-set variables
 # -------------------------------
@@ -57,6 +71,8 @@ baseargs = @baseargs@
 host_baseargs = @host_baseargs@
 GCC_MIN_VERSION_4_3_0:=@GCC_MIN_VERSION_4_3_0@
 GCC_MIN_VERSION_4_5_0:=@GCC_MIN_VERSION_4_5_0@
+GCC_MIN_VERSION_4_8_0:=@GCC_MIN_VERSION_4_8_0@
+GCC_MIN_VERSION_4_9_0:=@GCC_MIN_VERSION_4_9_0@
 GDB_MIN_VERSION_7_2:=@GDB_MIN_VERSION_7_2@
 BINUTILS_MIN_VERSION_2_21:=@BINUTILS_MIN_VERSION_2_21@
 GOLD_MIN_VERSION_2_21:=@GOLD_MIN_VERSION_2_21@
@@ -80,14 +96,15 @@ MPFR_VERSION=mpfr-@MPFR_VERSION@
 MPC_VERSION=mpc-@MPC_VERSION@
 PPL_VERSION=ppl-@PPL_VERSION@
 CLOOG_VERSION=cloog-@CLOOG_VERSION@
+ISL_VERSION=isl-@ISL_VERSION@
 GDB_VERSION=gdb-@GDB_VERSION@
-EXPAT_VERSION=expat-@EXPAT_VERSION@
+WITH_PYTHON=@WITH_PYTHON@
 HAVE_MPC=@have_mpc@
 HAVE_MPFR=@have_mpfr@
 HAVE_GMP=@have_gmp@
 HAVE_PPL=@have_ppl@
 HAVE_CLOOG=@have_cloog@
-HAVE_EXPAT=@have_expat@
+HAVE_ISL=@have_isl@
 ENABLE_GOLD=@enable_gold@
 ENABLE_LD_DEFAULT=@enable_ld_default@
 STAMP=touch
@@ -116,8 +133,12 @@ ifeq ($(HAVE_CLOOG), no)
   CLOOG_DIR=$(TEMP_INSTALLDIR)
 endif
 
-ifeq ($(HAVE_EXPAT),no)
-  EXPAT_DIR=$(TEMP_INSTALLDIR)
+ifeq ($(HAVE_ISL), no)
+  ISL_DIR=$(TEMP_INSTALLDIR)
+endif
+
+ifneq ($(WITH_PYTHON),)
+  WITH_PYTHON:=--with-python=$(WITH_PYTHON)
 endif
 
 # Figure out where to find the ld binary.
@@ -132,7 +153,8 @@ export	AS_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/gas/as-new \
 	NM_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/nm-new \
 	STRIP_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/strip-new \
 	RANLIB_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/ranlib \
-	OBJDUMP_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/objdump
+	OBJDUMP_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/objdump \
+	READELF_FOR_TARGET=$(TARGET_BINUTILS_BUILDDIR)/binutils/readelf
 
 TARGET_MINIMAL_GCC_EXPORTS= \
 export	CC_FOR_TARGET="$(TARGET_GCC_BUILDDIR)/gcc/xgcc \
@@ -146,12 +168,13 @@ export	CC_FOR_TARGET="$(TARGET_GCC_BUILDDIR)/gcc/xgcc \
 # 
 # To build libstdc++ with RTTI and exceptions do:
 #
-#export CFLAGS_FOR_TARGET=-fexceptions
-#export CXXFLAGS_FOR_TARGET=-frtti
+#export CFLAGS_FOR_TARGET= -fexceptions
+#export CXXFLAGS_FOR_TARGET= -frtti
 #
-CFLAGS_FOR_TARGET+= -O2 -Os -g
-CXXFLAGS_FOR_TARGET+=$(CFLAGS_FOR_TARGET)
-LDFLAGS_FOR_TARGET=
+
+CFLAGS_FOR_TARGET += -O2 -Os -g
+CXXFLAGS_FOR_TARGET += $(CFLAGS_FOR_TARGET)
+LDFLAGS_FOR_TARGET =
 
 # Helper
 prefix-list = $(foreach e, $(2), $(join $1, $e))
@@ -194,6 +217,7 @@ CFLAGS_FOR_BUILD ?= $(CFLAGS)
 LDFLAGS_FOR_BUILD ?= $(LDFLAGS)
 canadian_build_env := \
 	export CC_FOR_BUILD=$(cur_build)-gcc ; \
+	export CXX_FOR_BUILD=$(cur_build)-g++ ; \
 	export CC=$(cur_build)-gcc ; \
 	export CXX=$(cur_build)-g++ ; \
 	export CFLAGS="$(CFLAGS_FOR_BUILD)" ; \
@@ -202,6 +226,7 @@ canadian_build_env := \
 CANADIAN_ROOT := $(PWD)/host-${cur_build}
 canadian_env := \
 	export CC_FOR_BUILD=$(cur_build)-gcc ; \
+	export CXX_FOR_BUILD=$(cur_build)-g++ ; \
 	export CC=$(cur_host)-gcc ; \
 	export CXX=$(cur_host)-g++ ; \
 	export AR=$(cur_host)-ar ; \
@@ -221,10 +246,10 @@ all: build
 ifeq ($(ENABLE_GRAPHITE),yes)
 build: install-host-cloog
 endif
-build: build-target-binutils build-host-libbfd build-target-gcc \
+build: build-target-binutils build-target-gcc \
 	build-target-gdb
 
-install: install-target-binutils install-host-libbfd install-target-gcc \
+install: install-target-binutils install-target-gcc \
 	install-target-gdb
 
 # To support canadian cross build we need to build build->target toolchain
@@ -238,8 +263,8 @@ stmp-config-canadian-tools:
 	  mkdir $(CANADIAN_ROOT)) && \
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
-	 $(abs_srcdir)/configure $(baseargs) --build=$(cur_build) \
-		--host=$(cur_build) --target=$(cur_target)) && \
+	 $(abs_srcdir)/configure $(baseargs) --with-gdb-version=none --build=$(cur_build) \
+		--host=$(cur_build) --target=$(cur_target) --prefix=$(CANADIAN_ROOT)/install) && \
 	$(STAMP) $@
 
 build-canadian-tools: stmp-build-canadian-tools
@@ -253,7 +278,7 @@ install-canadian-tools: stmp-install-canadian-tools
 stmp-install-canadian-tools: stmp-build-canadian-tools
 	($(canadian_build_env) \
 	 cd $(CANADIAN_ROOT) && \
-	 $(MAKE) -j1 install prefix=$(CANADIAN_ROOT)/install) && \
+	 $(MAKE) -j1 install) && \
 	$(STAMP) $@
 
 # When building canadian cross toolchain we cannot build GCC target libraries.
@@ -288,39 +313,20 @@ config-target-binutils: stmp-config-target-binutils
 # We do not want to enable shared libraries in binutils
 BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
-	$(baseargs) --disable-shared --disable-nls
+	$(baseargs) --disable-shared --disable-nls --disable-werror
 ifeq ($(ENABLE_GRAPHITE),yes)
-BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-gmp=${GMP_DIR} \
-	--disable-ppl-version-check --disable-cloog-version-check $(CLOOG_BACKEND)
-# links to the static C++ runtime to avoid depending on the host version
-ifneq ($(host_os),darwin)
-BINUTILS_CONFIG_ARGS+= \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
-	 --with-gold-ldflags='-static-libgcc -static-libstdc++'
-else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-GCC_CONFIG_ARGS += '--with-host-libstdcxx=-static-libgcc -lstdc++ -lm'
-endif
+BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 endif
 # Enable dual linker support and make gold as default linker when gold is
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
 ifneq ($(ENABLE_GOLD),)
-ifeq ($(BINUTILS_MIN_VERSION_2_21),yes)
 ifeq ($(ENABLE_LD_DEFAULT),)
 BINUTILS_CONFIG_ARGS += --enable-gold=default
 endif
-else
-ifeq ($(ENABLE_LD_DEFAULT),)
-BINUTILS_CONFIG_ARGS += --enable-gold=both/gold
-else
-BINUTILS_CONFIG_ARGS += --enable-gold=both/ld
 endif
-endif
-endif
-stmp-config-target-binutils: config.status stmp-install-host-ppl $(canadian_stmp)
+
+stmp-config-target-binutils: config.status stmp-install-host-isl $(canadian_stmp)
 	([ -d ${BINUTILS_VERSION} ] || \
 	  mkdir ${BINUTILS_VERSION}) && \
 	($(canadian_env) \
@@ -336,19 +342,15 @@ install-target-binutils: stmp-build-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${BINUTILS_VERSION} install)
 
-# target gold rules.  We need these only if BINUTILS_VERSION != GOLD_VERSION
+# target gold rules.  We need these only if BINUTILS_VERSION is not the same as the GOLD_VERSION
 ifneq ($(BINUTILS_VERSION), $(GOLD_VERSION))
 .PHONY: config-target-gold build-target-gold install-target-gold
 config-target-gold: stmp-config-target-gold
 # We do not want to enable shared libraries in gold
 GOLD_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${target_alias} --host=${host} --build=${build} \
-	$(baseargs) --disable-shared
-ifeq ($(GOLD_MIN_VERSION_2_21),yes)
+	 $(baseargs) --disable-shared
 	GOLD_CONFIG_ARGS += --enable-gold=default
-else
-	GOLD_CONFIG_ARGS += --enable-gold=both/gold
-endif
 stmp-config-target-gold: config.status
 	([ -d ${GOLD_VERSION} ] || \
 	  mkdir ${GOLD_VERSION}) && \
@@ -373,41 +375,6 @@ install-target-gold: stmp-build-target-gold install-target-binutils
 
 endif
 
-# build libbfd for host.  We configure with all targets, so this is built
-# separately from the same source.
-# Required by Android build, we always build 32bit host libraries, and
-# put the 32bit host libraries into /lib32.
-.PHONY: config-host-libbfd build-host-libbfd install-host-libbfd
-config-host-libbfd: stmp-config-host-libbfd
-LIBBFD_CONFIG_ARGS=--prefix=$(prefix) \
-	--target=${target_alias} --host=${host} --build=${build} \
-	$(host_baseargs) --disable-shared \
-	--enable-install-libbfd --with-included-gettext
-stmp-config-host-libbfd: config.status
-	([ -d libbfd-${BINUTILS_VERSION} ] || \
-	  mkdir libbfd-${BINUTILS_VERSION}) && \
-	(cd libbfd-${BINUTILS_VERSION} ; \
-	 export CFLAGS="$(CFLAGS) -m32" ; \
-	 $(call find-package-srcdir, ${BINUTILS_VERSION})/configure \
-	  $(LIBBFD_CONFIG_ARGS)) && \
-	$(STAMP) $@
-build-host-libbfd: stmp-build-host-libbfd
-stmp-build-host-libbfd: stmp-config-host-libbfd
-	$(MAKE) -C libbfd-${BINUTILS_VERSION} all-bfd all-libiberty && \
-	$(MAKE) -C libbfd-${BINUTILS_VERSION}/intl libintl.a && \
-	$(STAMP) $@
-# Also include libintl.a.  We have to do this manully since the
-# source of libintl in binutils is modified to not install the library.
-# We build with -m32 always, and install host libs into /lib32.
-LIB32DIR=$(libdir)32
-install-host-libbfd: stmp-build-host-libbfd install-target-binutils
-	$(MAKE) -C libbfd-${BINUTILS_VERSION}/bfd install \
-		bfdlibdir=$(LIB32DIR) bfdincludedir=$(includedir) && \
-	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/intl/libintl.a \
-		$(LIB32DIR) && \
-	$(INSTALL_DATA) libbfd-${BINUTILS_VERSION}/libiberty/libiberty.a \
-		$(LIB32DIR)
-
 # target gcc rules
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
 .PHONY: install-target-gcc-gcc $(install-target-gcc-multilibs)
@@ -420,67 +387,85 @@ GCC_CONFIG_ARGS=--prefix=$(prefix) \
 
 # For gcc versions 4.3.0 and later, gmp and mpfr are required.
 # Also build libgcc is a seperate sub-target in 4.3.0+.
-ifeq ($(GCC_MIN_VERSION_4_3_0),yes)
 stmp-config-target-gcc: stmp-install-host-gmp stmp-install-host-mpfr
 GCC_CONFIG_ARGS += --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
-endif
 
 # For gcc versions 4.5.0 and higher, mpc is required.
-ifeq ($(GCC_MIN_VERSION_4_5_0),yes)
 stmp-config-target-gcc: stmp-install-host-mpc
 GCC_CONFIG_ARGS += --with-mpc=$(MPC_DIR)
-endif
 
-# For gcc 4.5+ with graphite optimization, cloog and ppl are required.
+# For gcc 4.5 and 4.6 with graphite optimization, cloog and ppl are required.
+# For gcc 4.8+ with graphite optimization, cloog and isl are required.
 ifeq ($(ENABLE_GRAPHITE),yes)
-GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-ppl=${PPL_DIR} \
-	--disable-ppl-version-check --disable-cloog-version-check $(CLOOG_BACKEND)
-# links to the static C++ runtime to avoid depending on the host version
-ifneq ($(host_os),darwin)
-GCC_CONFIG_ARGS += \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
+GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
 else
-# In darwin ld doesn't allow both -static and -dynamic.  Instead, we rely on explicit
-# "-isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)" to establish
-# minimal sdk version toolchain will run
-GCC_CONFIG_ARGS += '--with-host-libstdcxx=-static-libgcc -lstdc++ -lm'
+# Disable ppl, isl and cloog just in case the host have them install.
+GCC_CONFIG_ARGS += --without-ppl --without-cloog --without-isl
 endif
+
+# General configs for all targets
+GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs --enable-threads \
+	$(GCC_CONFIG_LIBSTDCXX_V3) --disable-shared --disable-libssp --disable-libitm \
+	--disable-plugin --disable-docs --disable-nls
+
+ifneq ($(target_os),linux-gnu)
+GCC_CONFIG_ARGS += --disable-libstdc__-v3
+endif
+
+ifneq ($(ENABLE_GOLD),)
+BINUTILS_CONFIG_ARGS += --with-gold-ldflags='-static-libgcc -static-libstdc++'
+endif
+
+LD += -ldl -lpthread -lrt
+CC += -pthread
+CXX += -pthread
+
+# -fno-short-enums does not work on GCC version >=4.9
+ifneq ($(GCC_MIN_VERSION_4_9_0),no)
+CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
+CXXFLAGS_FOR_TARGET += -DTARGET_POSIX_IO
 else
-# Disable ppl and cloog just in case the host have them install.
-GCC_CONFIG_ARGS += --without-ppl --without-cloog
+CFLAGS_FOR_TARGET += -fno-short-enums -DTARGET_POSIX_IO
+CXXFLAGS_FOR_TARGET += -fno-short-emums -DTARGET_POSIX_IO
 endif
 
-# Add Android specific gcc options.
-# FIXME: These should be overridable by configure options.
-
-
-# Target indenpendent Android gcc options.
-ifeq ($(BUILD_ANDROID_GCC),yes)
-GCC_CONFIG_ARGS += $(GCC_CONFIG_LIBSTDCXX_V3) --disable-libssp \
-	--enable-threads --disable-nls --disable-libmudflap --disable-libgomp \
-	--disable-libstdc__-v3 --disable-sjlj-exceptions --disable-shared \
-	--disable-tls --disable-libitm
-
-CFLAGS_FOR_TARGET += -DTARGET_POSIX_IO -fno-short-enums
-
-ifeq ($(target_cpu),i686)
-GCC_CONFIG_ARGS += --with-arch=i686 --with-tune=atom --with-fpmath=sse
-endif
-
-# ARM specific options.
-ifeq ($(target_cpu),arm)
-GCC_CONFIG_ARGS += --with-float=soft --with-fpu=vfp --with-arch=armv5te \
-	--enable-target-optspace
-
+# Android and ARM
+ifeq (arm,$(target_cpu))
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
-endif
+TARGET_ARCH := arm-eabi
+else
+TARGET_ARCH := arm-linux-androideabi
 endif
 
+GCC_CONFIG_ARGS += --with-float=soft --with-fpu=neon --with-arch=armv7-a --enable-target-optspace
+BINUTILS_CONFIG_ARGS += --enable-install-libbfd --enable-target-optspace
 endif
 
-# We add the baseargs and the end so that they override any default args
+# Android and ARM64
+ifeq (aarch64,$(target_cpu))
+GCC_CONFIG_ARGS += --with-arch=armv8-a --enable-target-optspace
+BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --enable-install-libbfd --enable-target-optspace
+
+TARGET_ARCH := aarch64-linux-android
+endif
+
+ifeq ($(target_cpu),i686)
+GCC_CONFIG_ARGS += --with-arch=i686 --with-fpmath=sse
+BINUTILS_CONFIG_ARGS += --disable-dependency-tracking
+endif
+
+ifeq ($(target_cpu),x86_64)
+GCC_CONFIG_ARGS += --with-arch=x86-64 --with-fpmath=sse --with-multilib-list=m64,m32,mx32 \
+	--enable-plugin
+BINUTILS_CONFIG_ARGS += --enable-64-bit-bfd --disable-dependency-tracking
+
+TARGET_ARCH := x86_64-linux
+endif
+
+# We add the baseargs at the end so that they override any default args for GCC only..
+# Binutils and other baseargs will not get overrided here
 GCC_CONFIG_ARGS += $(baseargs)
 
 # Add user specified --enable-gold=xxx option to gcc
@@ -489,7 +474,7 @@ GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
-stmp-config-target-gcc: config.status stmp-install-host-ppl stmp-build-target-binutils
+stmp-config-target-gcc: config.status stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
 	([ -d ${GCC_VERSION} ] || \
 	  mkdir ${GCC_VERSION}) && \
 	($(canadian_env) \
@@ -513,17 +498,13 @@ stmp-build-target-gcc: stmp-config-target-gcc
 install-target-gcc-gcc: stmp-build-target-gcc
 	($(canadian_env) \
 	 $(MAKE) -C ${GCC_VERSION} $(gcc_install_target))
-install-target-gcc: install-target-gcc-gcc $(install-target-gcc-multilibs)
+install-target-gcc: install-target-gcc-gcc $(install-target-gcc-multilibs) install-target-binutils
 
 # minimal gcc rules
 # minimal gcc only builds the C and C++ compilers and libgcc
 # We use the full gcc configure rules.
 .PHONY: build-target-minimal-gcc install-target-minimal-gcc
-ifeq ("$(GCC_MIN_VERSION_4_3_0)","yes")
-MINIMAL_GCC_BUILD_TARGETS:= gcc target-libgcc 
-else
-MINIMAL_GCC_BUILD_TARGETS:= gcc
-endif
+MINIMAL_GCC_BUILD_TARGETS:= gcc target-libgcc
 
 build-target-minimal-gcc: stmp-build-target-minimal-gcc
 stmp-build-target-minimal-gcc: stmp-config-target-gcc
@@ -563,7 +544,7 @@ install-target-newlib: stmp-build-target-newlib
 # host gmp rules
 .PHONY: config-host-gmp build-host-gmp install-host-gmp
 config-host-gmp: stmp-config-host-gmp
-GMP_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+GMP_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
 	  --host=${cur_host} --build=${cur_build}
 
 ifeq ($(ENABLE_GRAPHITE),yes)
@@ -594,7 +575,7 @@ install-host-gmp: stmp-install-host-gmp
 # host mpfr rules
 .PHONY: config-host-mpfr build-host-mpfr install-host-mpfr
 config-host-mpfr: stmp-config-host-mpfr
-MPFR_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+MPFR_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
 	  --host=${cur_host} --build=${cur_build} \
 	  --with-gmp=$(GMP_DIR)
 stmp-config-host-mpfr: config.status stmp-install-host-gmp
@@ -620,7 +601,7 @@ install-host-mpfr: stmp-install-host-mpfr
 # host mpc rules
 .PHONY: config-host-mpc build-host-mpc install-host-mpc
 config-host-mpc: stmp-config-host-mpc
-MPC_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+MPC_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
 	 --host=${cur_host} --build=${cur_build} \
 	 --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR)
 stmp-config-host-mpc: config.status stmp-install-host-gmp stmp-install-host-mpfr
@@ -666,21 +647,44 @@ stmp-config-host-ppl: config.status stmp-install-host-gmp
 stmp-build-host-ppl: stmp-config-host-ppl
 	$(MAKE) -C ${PPL_VERSION} && $(STAMP) $@
 build-host-ppl: stmp-build-host-ppl
+install-host-ppl: stmp-install-host-ppl
+
+# host isl rules
+.PHONY: config-host-isl build-host-isl install-host-isl
+config-host-isl: stmp-config-host-isl
+ISL_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared \
+	  --target=${target_alias} \
+	  --host=${host} --build=${build} \
+	  --disable-nls
+stmp-config-host-isl: config.status stmp-install-host-gmp
+	([ -d ${ISL_VERSION} ] || \
+	 mkdir ${ISL_VERSION}) && \
+	($(canadian_env) \
+	 cd ${ISL_VERSION} ; \
+         export CFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
+         export CXXFLAGS="${CFLAGS} -I$(GMP_DIR)/include" ; \
+         export LDFLAGS="${LDFLAGS} -L$(GMP_DIR)/lib" ; \
+	$(call find-package-srcdir, ${ISL_VERSION})/configure \
+	 $(ISL_CONFIG_ARGS)) && \
+	$(STAMP) $@
+stmp-build-host-isl: stmp-config-host-isl
+	$(MAKE) -C ${ISL_VERSION} && $(STAMP) $@
+build-host-isl: stmp-build-host-isl
 
 ifeq ($(ENABLE_GRAPHITE),yes)
-stmp-install-host-ppl: stmp-build-host-ppl
-	$(MAKE) -C ${PPL_VERSION} install && \
+stmp-install-host-isl: stmp-build-host-isl
+	$(MAKE) -C ${ISL_VERSION} install && \
 	$(STAMP) $@
 else
-stmp-install-host-ppl:
+stmp-install-host-isl:
 	$(STAMP) $@
 endif
-install-host-ppl: stmp-install-host-ppl
+install-host-isl: stmp-install-host-isl
 
 # host cloog rules
 .PHONY: config-host-cloog build-host-cloog install-host-cloog
 config-host-cloog: stmp-config-host-cloog
-CLOOG_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
+CLOOG_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --enable-shared --enable-static \
 	  --target=${target_alias} \
 	  --host=${host} --build=${build} \
 	  --disable-nls
@@ -698,7 +702,7 @@ stmp-install-host-ppl-workaround:
 CLOOG_CONFIG_ARGS+= --with-gmp=$(GMP_DIR) --with-ppl=$(PPL_DIR)
 else
 CLOOG_TARGET = libcloog-isl.la
-CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR)
+CLOOG_CONFIG_ARGS+= --with-gmp-prefix=$(GMP_DIR) --with-isl=bundled --with-osl=system --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=$(TARGET_ARCH)
 endif
 stmp-config-host-cloog: config.status stmp-install-host-gmp
 	([ -d ${CLOOG_VERSION} ] || \
@@ -713,40 +717,21 @@ stmp-build-host-cloog: stmp-config-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} $(CLOOG_TARGET) && \
 	$(STAMP) $@
 build-host-cloog: stmp-build-host-cloog
+
+ifeq ($(ENABLE_GRAPHITE),yes)
 stmp-install-host-cloog: stmp-build-host-cloog
 	$(MAKE) -C ${CLOOG_VERSION} install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
-ifeq ($(findstring ppl-,$(CLOOG_VERSION)),)
 	$(MAKE) -C ${CLOOG_VERSION}/isl install-libLTLIBRARIES \
 		install-pkgincludeHEADERS
-endif
+	$(MAKE) -C ${CLOOG_VERSION} install
 	$(STAMP) $@
+else
+stmp-install-host-cloog:
+	$(STAMP) $@
+endif
 install-host-cloog: stmp-install-host-cloog
 
-# host expat rules
-.PHONY: config-host-expat build-host-expat install-host-expat
-config-host-expat: stmp-config-host-expat
-EXPAT_CONFIG_ARGS=$(host_baseargs) --prefix=$(TEMP_INSTALLDIR) --disable-shared \
-	--host=${cur_host} --build=${cur_build}
-stmp-config-host-expat: config.status  $(canadian_stmp)
-	([ -d ${EXPAT_VERSION} ] || \
-	  mkdir ${EXPAT_VERSION}) && \
-	($(canadian_env) \
-	 cd ${EXPAT_VERSION} ; \
-	 $(call find-package-srcdir, ${EXPAT_VERSION})/configure \
-	  $(EXPAT_CONFIG_ARGS)) && \
-	$(STAMP) $@
-stmp-build-host-expat: stmp-config-host-expat
-	($(canadian_env) \
-	 $(MAKE) -C ${EXPAT_VERSION}) && $(STAMP) $@
-build-host-expat: stmp_build-host-expat
-ifeq ($(HAVE_EXPAT),no)
-stmp-install-host-expat: stmp-build-host-expat
-	$(MAKE) -C ${EXPAT_VERSION} install -j1 && $(STAMP) $@
-else
-stmp-install-host-expat:
-endif
-install-host-expat: stmp-install-host-expat
 
 # target gdb rules
 .PHONY: config-target-gdb build-target-gdb install-target-gdb
@@ -759,18 +744,7 @@ config-target-gdb: stmp-config-target-gdb
 
 GDB_CONFIG_ARGS=$(host_baseargs) --prefix=$(prefix) \
 	--target=$(GDB_TARGET) --host=${cur_host} --build=${cur_build} \
-	--disable-nls
-
-# For gdb versions 7.2 and higher, expat is required.
-ifeq ($(GDB_MIN_VERSION_7_2),yes)
-stmp-config-target-gdb: stmp-install-host-expat
-GDB_CONFIG_ARGS += --with-expat --with-libexpat-prefix=$(EXPAT_DIR)
-endif
-
-# For gdb 7.x, disable python support for now
-ifeq ($(filter gdb-6.%,$(GDB_VERSION)),)
-GDB_CONFIG_ARGS += --with-python=no
-endif
+	$(WITH_PYTHON) --disable-nls --disable-shared
 
 stmp-config-target-gdb: config.status $(canadian_stmp)
 	([ -d ${GDB_VERSION} ] || \
@@ -781,7 +755,7 @@ stmp-config-target-gdb: config.status $(canadian_stmp)
 	  $(GDB_CONFIG_ARGS)) && \
 	$(STAMP) $@
 build-target-gdb: stmp-build-target-gdb
-stmp-build-target-gdb: stmp-config-target-gdb
+stmp-build-target-gdb: stmp-config-target-gdb install-target-binutils
 	($(canadian_env) \
 	 $(MAKE) -C ${GDB_VERSION}) && $(STAMP) $@
 install-target-gdb: stmp-build-target-gdb
